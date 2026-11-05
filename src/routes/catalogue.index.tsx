@@ -5,7 +5,7 @@ import { categories, products } from "@/data/catalog";
 
 export const Route = createFileRoute("/catalogue/")({
   validateSearch: (s: Record<string, unknown>): { categorie?: string } => ({
-    categorie: typeof s.categorie === "string" ? s.categorie : undefined,
+    categorie: typeof s["categorie"] === "string" ? (s["categorie"] as string) : undefined,
   }),
   head: () => ({
     meta: [
