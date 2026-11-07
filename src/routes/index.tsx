@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { Truck, Sparkles, Wrench, Clock } from "lucide-react";
 import hero from "@/assets/hero.jpg";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { categories, products } from "@/data/catalog";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -25,6 +27,14 @@ const perks = [
 ];
 
 function Index() {
+  const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+
+  useEffect(() => {
+    (supabase as any).from("gallery").select("*").limit(3).then(({ data }: any) => {
+      setGalleryPhotos(data || []);
+    });
+  }, []);
+
   return (
     <SiteLayout>
       <section className="relative h-[85vh] min-h-[560px] flex items-center">
@@ -87,6 +97,33 @@ function Index() {
         <h2 className="text-5xl md:text-6xl">Un projet d'événement ?</h2>
         <p className="mt-4 opacity-70">Composez votre sélection et recevez un devis personnalisé sous 24h.</p>
         <Link to="/devis" className="inline-block mt-8 bg-primary text-primary-foreground px-10 py-4 uppercase tracking-widest text-sm">Mon devis</Link>
+      </section>
+
+      {/* Section Galerie */}
+      <section className="bg-zinc-50 py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="font-display text-4xl md:text-5xl mb-4">Nos dernières réalisations</h2>
+            <p className="text-muted-foreground">Découvrez quelques-uns de nos événements récents</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {galleryPhotos.map((p: any) => (
+              <Link key={p.id} to="/realisations" className="aspect-square overflow-hidden rounded-sm group">
+                <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+              </Link>
+            ))}
+            {galleryPhotos.length === 0 && (
+              <div className="col-span-3 text-center text-zinc-500 py-8">
+                Aucune photo pour le moment.
+              </div>
+            )}
+          </div>
+          <div className="text-center mt-12">
+            <Link to="/realisations" className="inline-block border border-zinc-300 px-8 py-3 text-sm uppercase tracking-widest hover:bg-zinc-900 hover:text-white transition-colors">
+              Voir toutes nos réalisations
+            </Link>
+          </div>
+        </div>
       </section>
     </SiteLayout>
   );

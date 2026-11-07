@@ -1,4 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { CookieBanner } from "../components/CookieBanner";
+
 import {
   Outlet,
   Link,
@@ -14,6 +17,10 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { QuoteProvider } from "../lib/quote";
 import { Toaster } from "../components/ui/sonner";
+// IMPORT AJOUTÉ ICI
+import { WhatsAppButton } from "../components/WhatsAppButton";
+// IMPORT POUR LA TRADUCTION
+import "../locales/i18n";
 
 function NotFoundComponent() {
   return (
@@ -115,15 +122,17 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+// ...
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <QuoteProvider>
         <Outlet />
         <Toaster />
+        <WhatsAppButton />
+        <CookieBanner />
       </QuoteProvider>
     </QueryClientProvider>
   );
