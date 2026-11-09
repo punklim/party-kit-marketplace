@@ -185,8 +185,24 @@ function ProductPage() {
           ? error.message
           : "Impossible d'envoyer la demande. Vérifiez vos informations et réessayez.",
       );
-    } else {
+       } else {
       toast.success("Réservation envoyée ! Nous vous confirmons sous 24h.");
+
+      await (supabase as any).functions.invoke("send-booking-email", {
+        body: {
+          type: "new_booking",
+          booking: {
+            client_name: bookingForm.name.trim(),
+            client_email: bookingForm.email.trim(),
+            client_phone: bookingForm.phone.trim(),
+            product_name: product.name,
+            start_date: startStr,
+            end_date: endStr,
+            quantity: qty,
+          },
+        },
+      });
+
       setShowBookingForm(false);
       setDateRange(undefined);
       setBookingForm({ name: "", email: "", phone: "" });
