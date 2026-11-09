@@ -86,11 +86,12 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F6] flex">
-          <aside className="hidden md:flex flex-col w-64 bg-[#111111] text-zinc-300 h-screen fixed left-0 top-0 z-40">        <div className="p-6 border-b border-zinc-800">
+      <aside className="hidden md:flex flex-col w-64 bg-[#111111] text-zinc-300 h-screen fixed left-0 top-0 z-40">
+        <div className="p-6 border-b border-zinc-800">
           <h1 className="font-display text-2xl text-white">Éclat<span className="text-[#D4AF37]">Events</span></h1>
           <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest">Administration</p>
         </div>
-          <nav className="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
+        <nav className="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
           <SidebarItem icon={LayoutDashboard} label="Vue d'ensemble" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
           <SidebarItem icon={FileText} label="Demandes de devis" active={activeTab === "devis"} onClick={() => setActiveTab("devis")} />
           <SidebarItem icon={Calendar} label="Planning" active={activeTab === "planning"} onClick={() => setActiveTab("planning")} />
@@ -311,11 +312,16 @@ function PlanningView() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [showNewBooking, setShowNewBooking] = useState(false);
+  const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
     (supabase as any).from("bookings").select("*, products(name)").order("start_date", { ascending: true }).then(({ data }: any) => {
       setBookings(data || []);
       setLoading(false);
+    });
+    (supabase as any).from("products").select("id, name, stock").eq("active", true).order("name").then(({ data }: any) => {
+      setProducts(data || []);
     });
   }, []);
 
@@ -327,12 +333,13 @@ function PlanningView() {
   const days = Array.from({ length: 7 }).map((_, i) => { const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i); return d; });
   const dayNames = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
-const getBookingsForDay = (day: Date) => bookings.filter(b => {
-  const start = new Date(b.start_date + "T00:00:00");
-  const end = new Date(b.end_date + "T00:00:00");
-  const d = new Date(day.getFullYear(), day.getMonth(), day.getDate());
-  return d >= start && d <= end;
-});  const conflicts = new Set();
+  const getBookingsForDay = (day: Date) => bookings.filter(b => {
+    const start = new Date(b.start_date + "T00:00:00");
+    const end = new Date(b.end_date + "T00:00:00");
+    const d = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+    return d >= start && d <= end;
+  });
+  const conflicts = new Set();
   days.forEach(day => {
     const dayBookings = getBookingsForDay(day);
     const productCount: Record<string, number> = {};
@@ -348,7 +355,9 @@ const getBookingsForDay = (day: Date) => bookings.filter(b => {
           <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 border border-zinc-700 rounded hover:bg-zinc-800"><ChevronLeft className="h-4 w-4" /></button>
           <button onClick={() => setWeekOffset(w => w + 1)} className="p-2 border border-zinc-700 rounded hover:bg-zinc-800"><ChevronRight className="h-4 w-4" /></button>
           <button className="px-4 py-2 bg-zinc-800 rounded text-sm">Semaine</button>
-          <button className="px-4 py-2 bg-[#D4AF37] text-black rounded text-sm font-medium flex items-center gap-2"><Plus className="h-4 w-4" /> Nouvelle réservation</button>
+          <button onClick={() => setShowNewBooking(true)} className="px-4 py-2 bg-[#D4AF37] text-black rounded text-sm font-medium flex items-center gap-2 hover:bg-[#c4a030]">
+            <Plus className="h-4 w-4" /> Nouvelle réservation
+          </button>
         </div>
       </div>
 
@@ -420,12 +429,130 @@ const getBookingsForDay = (day: Date) => bookings.filter(b => {
           </table>
         </div>
       </div>
+
+      {showNewBooking && (
+        <NewBookingModal
+          products={products}
+          onClose={() => setShowNewBooking(false)}
+          onSaved={() => {
+            setShowNewBooking(false);
+            (supabase as any).from("bookings").select("*, products(name)").order("start_date", { ascending: true }).then(({ data }: any) => {
+              setBookings(data || []);
+            });
+          }}
+        />
+      )}
     </div>
   );
 }
 
 // ============================================================
-// DEVIS (avec bascule Liste / Kanban)
+// MODAL NOUVELLE RÉSERVATION
+// ============================================================
+function NewBookingModal({ products, onClose, onSaved }: { products: any[]; onClose: () => void; onSaved: () => void; }) {
+  const [form, setForm] = useState({
+    productId: "",
+    startDate: "",
+    endDate: "",
+    quantity: 1,
+    clientName: "",
+    clientEmail: "",
+    clientPhone: "",
+    status: "confirme",
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const selectedProduct = products.find(p => p.id === form.productId);
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    if (!form.productId || !form.startDate || !form.endDate) {
+      setError("Remplissez tous les champs obligatoires.");
+      return;
+    }
+    if (form.endDate < form.startDate) {
+      setError("La date de fin doit être après la date de début.");
+      return;
+    }
+    setSaving(true);
+    const { error: err } = await (supabase as any).from("bookings").insert({
+      product_id: form.productId,
+      start_date: form.startDate,
+      end_date: form.endDate,
+      quantity: form.quantity,
+      client_name: form.clientName,
+      client_email: form.clientEmail,
+      client_phone: form.clientPhone,
+      status: form.status,
+    });
+    setSaving(false);
+    if (err) setError(err.message);
+    else onSaved();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-[#141414] border border-zinc-800 rounded-sm shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
+          <h2 className="font-display text-xl text-white">Nouvelle réservation</h2>
+          <button onClick={onClose} className="text-zinc-400 hover:text-white"><X className="h-5 w-5" /></button>
+        </div>
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && <div className="bg-red-950/50 text-red-300 p-3 text-sm border border-red-800">{error}</div>}
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Produit *</label>
+            <select required value={form.productId} onChange={e => setForm({ ...form, productId: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]">
+              <option value="">-- Choisir un produit --</option>
+              {products.map(p => <option key={p.id} value={p.id}>{p.name} (stock: {p.stock})</option>)}
+            </select>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Début *</label>
+              <input required type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Fin *</label>
+              <input required type="date" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Quantité</label>
+            <input type="number" min={1} max={selectedProduct?.stock || 1} value={form.quantity} onChange={e => setForm({ ...form, quantity: Number(e.target.value) })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Nom du client *</label>
+            <input required value={form.clientName} onChange={e => setForm({ ...form, clientName: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Email *</label>
+            <input required type="email" value={form.clientEmail} onChange={e => setForm({ ...form, clientEmail: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Téléphone *</label>
+            <input required type="tel" value={form.clientPhone} onChange={e => setForm({ ...form, clientPhone: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]" />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-1 block">Statut</label>
+            <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className="w-full bg-[#0A0A0A] border border-zinc-700 text-zinc-200 px-4 py-3 text-sm focus:outline-none focus:border-[#D4AF37]">
+              <option value="confirme">Confirmé (apparaît dans le planning)</option>
+              <option value="en_attente">En attente</option>
+            </select>
+          </div>
+          <div className="pt-4 border-t border-zinc-800 flex justify-end gap-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-400 hover:text-white">Annuler</button>
+            <button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm font-medium rounded hover:bg-[#c4a030] disabled:opacity-50">{saving ? "Enregistrement..." : "Créer la réservation"}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ============================================================
+// DEVIS
 // ============================================================
 function DevisList() {
   const [devis, setDevis] = useState<any[]>([]);
@@ -468,12 +595,8 @@ function DevisList() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="font-display text-3xl">Demandes de devis</h1>
-          <p className="text-zinc-500 text-sm mt-1">{devis.length} demande(s)</p>
-        </div>
+        <div><h1 className="font-display text-3xl">Demandes de devis</h1><p className="text-zinc-500 text-sm mt-1">{devis.length} demande(s)</p></div>
         <div className="flex items-center gap-2">
-          {/* Bascule Liste / Kanban */}
           <div className="flex bg-zinc-100 rounded-sm p-1">
             <button onClick={() => setViewMode("list")} className={`px-3 py-1.5 text-sm rounded ${viewMode === "list" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}>Liste</button>
             <button onClick={() => setViewMode("kanban")} className={`px-3 py-1.5 text-sm rounded ${viewMode === "kanban" ? "bg-zinc-900 text-white" : "text-zinc-600"}`}>Kanban</button>
