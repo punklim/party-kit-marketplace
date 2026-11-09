@@ -327,8 +327,12 @@ function PlanningView() {
   const days = Array.from({ length: 7 }).map((_, i) => { const d = new Date(startOfWeek); d.setDate(startOfWeek.getDate() + i); return d; });
   const dayNames = ["LUN", "MAR", "MER", "JEU", "VEN", "SAM", "DIM"];
 
-  const getBookingsForDay = (day: Date) => bookings.filter(b => { const start = new Date(b.start_date); const end = new Date(b.end_date); return day >= start && day <= end; });
-  const conflicts = new Set();
+const getBookingsForDay = (day: Date) => bookings.filter(b => {
+  const start = new Date(b.start_date + "T00:00:00");
+  const end = new Date(b.end_date + "T00:00:00");
+  const d = new Date(day.getFullYear(), day.getMonth(), day.getDate());
+  return d >= start && d <= end;
+});  const conflicts = new Set();
   days.forEach(day => {
     const dayBookings = getBookingsForDay(day);
     const productCount: Record<string, number> = {};
