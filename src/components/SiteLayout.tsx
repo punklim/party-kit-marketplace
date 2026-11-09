@@ -12,15 +12,15 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouterState();
   const pathname = router.location.pathname;
-  
+
   const whatsappNumber = "212691055597";
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent("Bonjour Éclat Events, je souhaite avoir des informations.")}`;
 
-   const navLinks = [
+  const navLinks = [
     { to: "/", label: t("nav.home") },
     { to: "/catalogue", label: t("nav.catalogue") },
     { to: "/realisations", label: "Réalisations" },
-    { to: "/blog", label: "Blog" }, // <-- Ajout ici
+    { to: "/blog", label: "Blog" },
     { to: "/a-propos", label: t("nav.about") },
     { to: "/contact", label: t("nav.contact") },
   ];
@@ -34,13 +34,13 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     const form = e.target as HTMLFormElement;
     const emailInput = form.elements.namedItem("email") as HTMLInputElement;
     const btn = form.querySelector("button") as HTMLButtonElement;
-    
+
     if (!emailInput.value) return;
     btn.disabled = true;
     btn.textContent = "Inscription...";
-    
+
     const { error } = await supabase.from("newsletter").insert({ email: emailInput.value });
-    
+
     if (error) {
       alert("Cette adresse est déjà inscrite ou une erreur est survenue.");
       btn.disabled = false;
@@ -86,8 +86,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           <div className="flex items-center gap-3">
             <div className="hidden sm:flex items-center gap-1 border rounded px-2 py-1 text-xs">
               <Globe className="h-3 w-3 text-zinc-500" />
-              <select 
-                value={i18n.language} 
+              <select
+                value={i18n.language}
                 onChange={(e) => changeLanguage(e.target.value)}
                 className="bg-transparent focus:outline-none cursor-pointer uppercase"
               >
@@ -107,7 +107,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <Link to="/devis" className="hidden sm:flex items-center gap-2 bg-zinc-900 text-white px-4 py-2 text-sm uppercase tracking-widest hover:bg-zinc-800 transition-colors">
               {t("nav.devis")} {count > 0 && `(${count})`}
             </Link>
-            
+
             <button className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X /> : <Menu />}
             </button>
@@ -127,6 +127,9 @@ export function SiteLayout({ children }: { children: ReactNode }) {
                   {link.label}
                 </Link>
               ))}
+              <Link to="/mes-reservations" onClick={() => setMobileMenuOpen(false)} className="text-sm uppercase tracking-widest">
+                Mes réservations
+              </Link>
               <div className="flex gap-2 pt-2 border-t">
                 <button onClick={() => changeLanguage("fr")} className={`px-3 py-1 text-xs border rounded ${i18n.language === "fr" ? "bg-zinc-900 text-white" : ""}`}>FR</button>
                 <button onClick={() => changeLanguage("en")} className={`px-3 py-1 text-xs border rounded ${i18n.language === "en" ? "bg-zinc-900 text-white" : ""}`}>EN</button>
@@ -216,6 +219,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               {navLinks.map((link) => (
                 <li key={link.to}><Link to={link.to} className="hover:text-white transition-colors">{link.label}</Link></li>
               ))}
+              <li><Link to="/mes-reservations" className="hover:text-white transition-colors">Mes réservations</Link></li>
               <li><Link to="/devis" className="hover:text-white transition-colors">{t("nav.devis")}</Link></li>
             </ul>
           </div>
@@ -249,11 +253,11 @@ export function SiteLayout({ children }: { children: ReactNode }) {
               <p className="text-sm">Recevez nos offres et inspirations par email.</p>
             </div>
             <form onSubmit={handleNewsletter} className="flex gap-2">
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="Votre adresse email" 
-                required 
+              <input
+                type="email"
+                name="email"
+                placeholder="Votre adresse email"
+                required
                 className="flex-1 bg-[#111C2E] border border-zinc-800 px-4 py-3 text-sm text-white focus:outline-none focus:border-primary"
               />
               <button type="submit" className="bg-[#D4AF37] text-zinc-900 px-6 py-3 text-sm font-medium hover:bg-[#c29e2f] transition-colors">
@@ -262,7 +266,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             </form>
           </div>
         </div>
-        
+
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-zinc-800 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
           <p>&copy; {new Date().getFullYear()} Éclat Events. {t("footer.rights")}</p>
           <div className="flex gap-4">

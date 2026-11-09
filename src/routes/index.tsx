@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { Truck, Sparkles, Wrench, Clock } from "lucide-react";
+import { Truck, Sparkles, Wrench, Clock, Star } from "lucide-react";
 import hero from "@/assets/hero.jpg";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
@@ -28,11 +28,21 @@ const perks = [
 
 function Index() {
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [avis, setAvis] = useState<any[]>([]);
 
   useEffect(() => {
     (supabase as any).from("gallery").select("*").limit(3).then(({ data }: any) => {
       setGalleryPhotos(data || []);
     });
+    (supabase as any)
+      .from("testimonials")
+      .select("*")
+      .eq("approved", true)
+      .order("created_at", { ascending: false })
+      .limit(3)
+      .then(({ data }: any) => {
+        setAvis(data || []);
+      });
   }, []);
 
   return (
@@ -92,6 +102,34 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Section Avis clients */}
+      {avis.length > 0 && (
+        <section className="py-24 px-6 bg-[#FAF8F5]">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-14">
+              <p className="text-primary uppercase tracking-[0.3em] text-xs">Excellence & Confiance</p>
+              <h2 className="text-5xl mt-3">Ils nous font confiance</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {avis.map((a) => (
+                <div key={a.id} className="bg-white border rounded-sm shadow-sm p-6">
+                  <div className="flex gap-1 mb-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star key={i} className={`h-4 w-4 ${i < a.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-300"}`} />
+                    ))}
+                  </div>
+                  <p className="text-sm italic text-zinc-700 mb-6">"{a.content}"</p>
+                  <div className="pt-4 border-t">
+                    <p className="font-semibold text-zinc-900">{a.name}</p>
+                    {a.role && <p className="text-xs text-muted-foreground">{a.role}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="bg-secondary text-secondary-foreground py-24 text-center px-6">
         <h2 className="text-5xl md:text-6xl">Un projet d'événement ?</h2>
