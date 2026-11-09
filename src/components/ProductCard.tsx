@@ -11,7 +11,7 @@ export function ProductCard({ p }: { p: any }) {
 
   return (
     <div className="group bg-card border hover:shadow-elegant transition-shadow relative">
-      <Link to="/catalogue/$slug" params={{ slug: p.slug }} className="block overflow-hidden aspect-square">
+      <Link to="/produit/$slug" params={{ slug: p.slug }} className="block overflow-hidden aspect-square">
         <img 
           src={imageUrl} 
           alt={p.name} 

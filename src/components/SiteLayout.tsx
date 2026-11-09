@@ -209,25 +209,44 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </div>
 
           <div>
-            <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Navigation</h4>
-            <ul className="space-y-3 text-sm">
-              {navLinks.map((link) => (
-                <li key={link.to}><Link to={link.to} className="hover:text-white transition-colors">{link.label}</Link></li>
-              ))}
-              <li><Link to="/mes-reservations" className="hover:text-white transition-colors">Mes réservations</Link></li>
-              <li><Link to="/devis" className="hover:text-white transition-colors">{t("nav.devis")}</Link></li>
-            </ul>
-          </div>
+  <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Navigation</h4>
+  <ul className="space-y-3 text-sm">
+    {navLinks.map((link) => (
+      <li key={link.to}>
+        <Link to={link.to} className="hover:text-white transition-colors">{link.label}</Link>
+      </li>
+    ))}
+    <li><Link to="/mes-reservations" className="hover:text-white transition-colors">Mes réservations</Link></li>
+    <li><Link to="/avis" className="hover:text-white transition-colors">Laisser un avis</Link></li>
+    <li><Link to="/devis" className="hover:text-white transition-colors">{t("nav.devis")}</Link></li>
+  </ul>
+</div>
 
           <div>
-            <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Services</h4>
-            <ul className="space-y-3 text-sm">
-              <li><Link to="/catalogue/$categorie" params={{ categorie: "mobilier" }} className="hover:text-white transition-colors">Mobilier</Link></li>
-              <li><Link to="/catalogue/$categorie" params={{ categorie: "tentes" }} className="hover:text-white transition-colors">Tentes & Chapiteaux</Link></li>
-              <li><Link to="/catalogue/$categorie" params={{ categorie: "son-lumiere" }} className="hover:text-white transition-colors">Son & Lumière</Link></li>
-              <li><Link to="/catalogue/$categorie" params={{ categorie: "art-de-table" }} className="hover:text-white transition-colors">Art de la table</Link></li>
-            </ul>
-          </div>
+  <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Services</h4>
+  <ul className="space-y-3 text-sm">
+    <li>
+      <Link to="/catalogue/$categorie" params={{ categorie: "mobilier" }} className="hover:text-white transition-colors">
+        Mobilier
+      </Link>
+    </li>
+    <li>
+      <Link to="/catalogue/$categorie" params={{ categorie: "tentes" }} className="hover:text-white transition-colors">
+        Tentes & Chapiteaux
+      </Link>
+    </li>
+    <li>
+      <Link to="/catalogue/$categorie" params={{ categorie: "son-lumiere" }} className="hover:text-white transition-colors">
+        Son & Lumière
+      </Link>
+    </li>
+    <li>
+      <Link to="/catalogue/$categorie" params={{ categorie: "art-de-table" }} className="hover:text-white transition-colors">
+        Art de la table
+      </Link>
+    </li>
+  </ul>
+</div>
 
           <div>
             <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Contact</h4>

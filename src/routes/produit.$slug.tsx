@@ -12,7 +12,7 @@ import { fr } from "date-fns/locale";
 import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "date-fns";
 import "react-day-picker/dist/style.css";
 
-export const Route = createFileRoute("/catalogue/$slug")({
+export const Route = createFileRoute("/produit/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `Produit — Éclat Events` },
