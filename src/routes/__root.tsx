@@ -84,6 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
+      { name: "google-site-verification", content: "kA1VTRgE3qiS6OOBIUp7VGv4KPOY2qIsVDE9RRiPJkA" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Éclat Events — Location de matériel événementiel au Maroc" },
       { name: "description", content: "Mobilier, tentes, sonorisation et art de la table en location pour vos mariages et événements au Maroc." },
