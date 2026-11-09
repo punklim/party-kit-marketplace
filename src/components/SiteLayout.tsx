@@ -54,7 +54,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col bg-background font-sans text-foreground">
-      {/* Top Bar */}
       <div className="bg-zinc-950 text-zinc-300 text-xs py-2">
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
           <a href="tel:+212691055597" className="flex items-center gap-2 hover:text-white transition-colors">
@@ -64,7 +63,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      {/* Header */}
       <header className="bg-background border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link to="/" className="font-display text-3xl tracking-wide text-primary">
@@ -145,7 +143,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 
       <main className="flex-1">{children}</main>
 
-      {/* CTA Section */}
       <section className="bg-[#0B1729] text-white py-16 px-6">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
           <div>
@@ -163,7 +160,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         </div>
       </section>
 
-      {/* Social Media Section */}
       <section className="bg-[#0B1729] text-white py-20 text-center border-t border-zinc-800/50">
         <div className="max-w-5xl mx-auto px-6">
           <span className="inline-block border border-[#D4AF37] text-[#D4AF37] text-[10px] font-bold uppercase tracking-[0.2em] px-5 py-2 rounded-full mb-6">
@@ -198,7 +194,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-[#0B1729] text-zinc-400 py-16 border-t border-zinc-800">
         <div className="max-w-7xl mx-auto px-6 grid gap-12 md:grid-cols-4">
           <div className="md:col-span-1">
@@ -227,10 +222,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           <div>
             <h4 className="text-white font-semibold uppercase tracking-wider text-sm mb-4">Services</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link to="/catalogue" className="hover:text-white transition-colors">Mobilier</Link></li>
-              <li><Link to="/catalogue" className="hover:text-white transition-colors">Tentes & Chapiteaux</Link></li>
-              <li><Link to="/catalogue" className="hover:text-white transition-colors">Son & Lumière</Link></li>
-              <li><Link to="/catalogue" className="hover:text-white transition-colors">Art de la table</Link></li>
+              <li><Link to="/catalogue/$categorie" params={{ categorie: "mobilier" }} className="hover:text-white transition-colors">Mobilier</Link></li>
+              <li><Link to="/catalogue/$categorie" params={{ categorie: "tentes" }} className="hover:text-white transition-colors">Tentes & Chapiteaux</Link></li>
+              <li><Link to="/catalogue/$categorie" params={{ categorie: "son-lumiere" }} className="hover:text-white transition-colors">Son & Lumière</Link></li>
+              <li><Link to="/catalogue/$categorie" params={{ categorie: "art-de-table" }} className="hover:text-white transition-colors">Art de la table</Link></li>
             </ul>
           </div>
 
@@ -245,7 +240,6 @@ export function SiteLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
 
-        {/* Newsletter Form */}
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-zinc-800">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
             <div>

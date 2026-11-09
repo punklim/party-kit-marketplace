@@ -13,9 +13,16 @@ import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "d
 import "react-day-picker/dist/style.css";
 
 export const Route = createFileRoute("/catalogue/$slug")({
+  head: ({ params }) => ({
+    meta: [
+      { title: `Produit — Éclat Events` },
+      { property: "og:title", content: "Produit en location — Éclat Events" },
+      { property: "og:type", content: "article" },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
+    ],
+  }),
   component: ProductPage,
 });
-
 type BookedRange = { start_date: string; end_date: string; quantity: number };
 
 // Doit rester aligné avec la politique RLS de la table bookings (60 jours max)

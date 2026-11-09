@@ -17,9 +17,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { QuoteProvider } from "../lib/quote";
 import { Toaster } from "../components/ui/sonner";
-// IMPORT AJOUTÉ ICI
 import { WhatsAppButton } from "../components/WhatsAppButton";
-// IMPORT POUR LA TRADUCTION
 import "../locales/i18n";
 
 function NotFoundComponent() {
@@ -87,16 +85,25 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Éclat Events" },
-      { name: "description", content: "Location de matériel événementiel au Maroc" },
+      { title: "Éclat Events — Location de matériel événementiel au Maroc" },
+      { name: "description", content: "Mobilier, tentes, sonorisation et art de la table en location pour vos mariages et événements au Maroc." },
+      
+      // Open Graph par défaut
       { property: "og:type", content: "website" },
+      { property: "og:title", content: "Éclat Events — Location de matériel événementiel" },
+      { property: "og:description", content: "Mobilier, tentes, son & lumière en location partout au Maroc." },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
+      { property: "og:site_name", content: "Éclat Events" },
+      { property: "og:locale", content: "fr_FR" },
+      
+      // Twitter Card
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "Éclat Events — Location de matériel événementiel" },
+      { name: "twitter:description", content: "Mobilier, tentes, son & lumière en location partout au Maroc." },
+      { name: "twitter:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@400;500;600&display=swap" },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
@@ -121,8 +128,6 @@ function RootShell({ children }: { children: ReactNode }) {
     </html>
   );
 }
-
-// ...
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

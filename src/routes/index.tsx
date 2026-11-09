@@ -14,11 +14,12 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Mobilier, tentes, sonorisation et art de la table en location pour vos mariages et événements au Maroc." },
       { property: "og:title", content: "Éclat Events — Location de matériel événementiel" },
       { property: "og:description", content: "Mobilier, tentes, son & lumière en location partout au Maroc." },
+      { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
     ],
   }),
   component: Index,
 });
-
 const perks = [
   { icon: Truck, t: "Livraison", d: "Partout au Maroc" },
   { icon: Wrench, t: "Montage", d: "Équipe technique dédiée" },
