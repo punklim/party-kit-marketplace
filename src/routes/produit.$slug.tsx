@@ -13,9 +13,9 @@ import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "d
 import "react-day-picker/dist/style.css";
 
 export const Route = createFileRoute("/produit/$slug")({
-  head: () => ({
+  head: ({ params }) => ({
     meta: [
-      { title: "Produit — Éclat Events" },
+      { title: `Produit — Éclat Events` },
       { property: "og:title", content: "Produit en location — Éclat Events" },
       { property: "og:type", content: "article" },
       { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/produit/$slug")({
 
 type BookedRange = { start_date: string; end_date: string; quantity: number };
 
-// Doit rester aligné avec la fonction SQL create_booking (60 jours max)
+// Doit rester aligné avec la politique RLS de la table bookings (60 jours max)
 const MAX_DAYS = 60;
 
 function ProductPage() {
@@ -44,6 +44,15 @@ function ProductPage() {
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [bookingForm, setBookingForm] = useState({ name: "", email: "", phone: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
+
+  // État pour la confirmation persistante
+  const [confirmation, setConfirmation] = useState<{
+    reference: string;
+    start: string;
+    end: string;
+    product: string;
+    qty: number;
+  } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -151,7 +160,7 @@ function ProductPage() {
     const startStr = format(from, "yyyy-MM-dd");
     const endStr = format(to, "yyyy-MM-dd");
 
-    // Contrôle côté serveur (le calendrier affiché peut être en retard)
+    // Contrôle final côté serveur (le calendrier affiché peut être en retard)
     const { data: available } = await (supabase as any).rpc("get_available_quantity", {
       p_product: product.id,
       p_start: startStr,
@@ -167,15 +176,20 @@ function ProductPage() {
       return;
     }
 
-    // Création via la fonction SQL : validations + référence de suivi
-    const { data: reference, error } = await (supabase as any).rpc("create_booking", {
-      p_product: product.id,
-      p_start: startStr,
-      p_end: endStr,
-      p_quantity: qty,
-      p_name: bookingForm.name.trim(),
-      p_email: bookingForm.email.trim(),
-      p_phone: bookingForm.phone.trim(),
+    // Génère une référence unique : RS-ANNEE-NUMERO-CODE
+    const year = new Date().getFullYear();
+    const randomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const reference = `RS-${year}-${String(Date.now()).slice(-4)}-${randomCode}`;
+
+    const { error } = await (supabase as any).from("bookings").insert({
+      product_id: product.id,
+      start_date: startStr,
+      end_date: endStr,
+      quantity: qty,
+      client_name: bookingForm.name.trim(),
+      client_email: bookingForm.email.trim(),
+      client_phone: bookingForm.phone.trim(),
+      reference: reference,
     });
 
     setBookingLoading(false);
@@ -183,19 +197,39 @@ function ProductPage() {
     if (error) {
       console.error(error);
       toast.error(
-        error.code === "P0001"
+        error.message?.includes("Trop de demandes")
           ? error.message
           : "Impossible d'envoyer la demande. Vérifiez vos informations et réessayez.",
       );
-      return;
-    }
+    } else {
+      // Affiche la confirmation persistante
+      setConfirmation({
+        reference,
+        start: format(from, "dd/MM/yyyy", { locale: fr }),
+        end: format(to, "dd/MM/yyyy", { locale: fr }),
+        product: product.name,
+        qty,
+      });
 
-    toast.success(`Demande envoyée ! Votre référence : ${reference}. Conservez-la pour suivre votre réservation.`, {
-      duration: 15000,
-    });
-    setShowBookingForm(false);
-    setDateRange(undefined);
-    setBookingForm({ name: "", email: "", phone: "" });
+      await (supabase as any).functions.invoke("send-booking-email", {
+        body: {
+          type: "new_booking",
+          booking: {
+            client_name: bookingForm.name.trim(),
+            client_email: bookingForm.email.trim(),
+            client_phone: bookingForm.phone.trim(),
+            product_name: product.name,
+            start_date: startStr,
+            end_date: endStr,
+            quantity: qty,
+          },
+        },
+      });
+
+      setShowBookingForm(false);
+      setDateRange(undefined);
+      setBookingForm({ name: "", email: "", phone: "" });
+    }
   };
 
   if (loading) {
@@ -373,6 +407,61 @@ function ProductPage() {
                   {bookingLoading ? "Envoi..." : "Demander la réservation"}
                 </button>
               </form>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Confirmation persistante de réservation */}
+      {confirmation && (
+        <section className="mx-auto max-w-7xl px-6 pb-16">
+          <div className="bg-green-50 border-2 border-green-500 rounded-lg p-8">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center shrink-0">
+                <span className="text-white text-2xl">✓</span>
+              </div>
+              <div className="flex-1">
+                <h2 className="font-display text-3xl text-green-900 mb-2">
+                  Réservation envoyée !
+                </h2>
+                <p className="text-green-800 mb-6">
+                  Merci ! Nous vous confirmons votre réservation sous 24h. Conservez précieusement votre référence.
+                </p>
+
+                <div className="bg-white border border-green-300 rounded p-4 mb-6">
+                  <p className="text-xs text-green-700 uppercase tracking-wider mb-1">Votre référence</p>
+                  <p className="font-mono text-2xl font-bold text-green-900">{confirmation.reference}</p>
+                  <p className="text-sm text-green-700 mt-2">
+                    {confirmation.product} · {confirmation.qty} unité(s) · du {confirmation.start} au {confirmation.end}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(confirmation.reference);
+                      toast.success("Référence copiée !");
+                    }}
+                    className="bg-green-700 text-white px-5 py-2 rounded text-sm font-medium hover:bg-green-800"
+                  >
+                    📋 Copier la référence
+                  </button>
+                  <Link
+                    to="/mes-reservations"
+                    className="border border-green-700 text-green-700 px-5 py-2 rounded text-sm font-medium hover:bg-green-50"
+                  >
+                    Voir mes réservations
+                  </Link>
+                  <a
+                    href={`https://wa.me/212691055597?text=${encodeURIComponent(`Bonjour, je viens de faire une réservation (réf. ${confirmation.reference})`)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-[#25D366] text-white px-5 py-2 rounded text-sm font-medium hover:bg-[#20b858]"
+                  >
+                    💬 Nous contacter sur WhatsApp
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
         </section>
