@@ -13,9 +13,9 @@ import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "d
 import "react-day-picker/dist/style.css";
 
 export const Route = createFileRoute("/produit/$slug")({
-  head: ({ params }) => ({
+  head: () => ({
     meta: [
-      { title: `Produit — Éclat Events` },
+      { title: "Produit — Éclat Events" },
       { property: "og:title", content: "Produit en location — Éclat Events" },
       { property: "og:type", content: "article" },
       { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
@@ -23,9 +23,10 @@ export const Route = createFileRoute("/produit/$slug")({
   }),
   component: ProductPage,
 });
+
 type BookedRange = { start_date: string; end_date: string; quantity: number };
 
-// Doit rester aligné avec la politique RLS de la table bookings (60 jours max)
+// Doit rester aligné avec la fonction SQL create_booking (60 jours max)
 const MAX_DAYS = 60;
 
 function ProductPage() {
@@ -150,7 +151,7 @@ function ProductPage() {
     const startStr = format(from, "yyyy-MM-dd");
     const endStr = format(to, "yyyy-MM-dd");
 
-    // Contrôle final côté serveur (le calendrier affiché peut être en retard)
+    // Contrôle côté serveur (le calendrier affiché peut être en retard)
     const { data: available } = await (supabase as any).rpc("get_available_quantity", {
       p_product: product.id,
       p_start: startStr,
@@ -166,14 +167,15 @@ function ProductPage() {
       return;
     }
 
-    const { error } = await (supabase as any).from("bookings").insert({
-      product_id: product.id,
-      start_date: startStr,
-      end_date: endStr,
-      quantity: qty,
-      client_name: bookingForm.name.trim(),
-      client_email: bookingForm.email.trim(),
-      client_phone: bookingForm.phone.trim(),
+    // Création via la fonction SQL : validations + référence de suivi
+    const { data: reference, error } = await (supabase as any).rpc("create_booking", {
+      p_product: product.id,
+      p_start: startStr,
+      p_end: endStr,
+      p_quantity: qty,
+      p_name: bookingForm.name.trim(),
+      p_email: bookingForm.email.trim(),
+      p_phone: bookingForm.phone.trim(),
     });
 
     setBookingLoading(false);
@@ -181,32 +183,19 @@ function ProductPage() {
     if (error) {
       console.error(error);
       toast.error(
-        error.message?.includes("Trop de demandes")
+        error.code === "P0001"
           ? error.message
           : "Impossible d'envoyer la demande. Vérifiez vos informations et réessayez.",
       );
-       } else {
-      toast.success("Réservation envoyée ! Nous vous confirmons sous 24h.");
-
-      await (supabase as any).functions.invoke("send-booking-email", {
-        body: {
-          type: "new_booking",
-          booking: {
-            client_name: bookingForm.name.trim(),
-            client_email: bookingForm.email.trim(),
-            client_phone: bookingForm.phone.trim(),
-            product_name: product.name,
-            start_date: startStr,
-            end_date: endStr,
-            quantity: qty,
-          },
-        },
-      });
-
-      setShowBookingForm(false);
-      setDateRange(undefined);
-      setBookingForm({ name: "", email: "", phone: "" });
+      return;
     }
+
+    toast.success(`Demande envoyée ! Votre référence : ${reference}. Conservez-la pour suivre votre réservation.`, {
+      duration: 15000,
+    });
+    setShowBookingForm(false);
+    setDateRange(undefined);
+    setBookingForm({ name: "", email: "", phone: "" });
   };
 
   if (loading) {
