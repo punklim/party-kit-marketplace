@@ -244,6 +244,10 @@ export function SiteLayout({ children }: { children: ReactNode }) {
       <Link to="/catalogue/$categorie" params={{ categorie: "art-de-table" }} className="hover:text-white transition-colors">
         Art de la table
       </Link>
+      <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
+      <Link to="/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
+      <Link to="/cgv" className="hover:text-white transition-colors">CGV</Link>
+      <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
     </li>
   </ul>
 </div>
@@ -282,9 +286,11 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-zinc-800 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
           <p>&copy; {new Date().getFullYear()} Éclat Events. {t("footer.rights")}</p>
-          <div className="flex gap-4">
-            <a href="#" className="hover:text-white transition-colors">Mentions légales</a>
-            <a href="#" className="hover:text-white transition-colors">Confidentialité</a>
+                    <div className="flex flex-wrap gap-4">
+            <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
+            <Link to="/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
+            <Link to="/cgv" className="hover:text-white transition-colors">CGV</Link>
+            <Link to="/faq" className="hover:text-white transition-colors">FAQ</Link>
           </div>
         </div>
       </footer>
