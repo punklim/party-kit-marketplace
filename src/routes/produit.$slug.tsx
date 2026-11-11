@@ -6,12 +6,13 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { formatPrice } from "@/data/catalog";
 import { useQuote } from "@/lib/quote";
+import { useDateLocale, useTextDirection, getLocalizedField } from "@/lib/use-locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Calendar as CalendarIcon, Check, Copy, MessageCircle, X } from "lucide-react";
 import { DayPicker, type DateRange } from "react-day-picker";
 import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "date-fns";
 import "react-day-picker/dist/style.css";
-import { getLocalizedField } from "@/lib/use-locale";
+
 export const Route = createFileRoute("/produit/$slug")({
   head: () => ({
     meta: [
@@ -36,15 +37,12 @@ type Confirmation = {
   total: number;
 };
 
-// Doit rester aligné avec la fonction SQL create_booking (60 jours max)
 const MAX_DAYS = 60;
-
-// Numéro WhatsApp de l'entreprise (format international, sans +)
 const WHATSAPP_NUMBER = "212691055597";
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(); // ICI : on déclare t et i18n ensemble
   const dateLocale = useDateLocale();
   const dir = useTextDirection();
   const [product, setProduct] = useState<any>(null);
@@ -55,13 +53,11 @@ function ProductPage() {
   const [qty, setQty] = useState(1);
   const { add } = useQuote();
 
-  // États pour la réservation
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [bookingForm, setBookingForm] = useState({ name: "", email: "", phone: "" });
   const [bookingLoading, setBookingLoading] = useState(false);
 
-  // Confirmation affichée après l'envoi (reste visible jusqu'à fermeture)
   const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [copied, setCopied] = useState(false);
   const confirmationRef = useRef<HTMLElement | null>(null);
@@ -103,7 +99,6 @@ function ProductPage() {
               .neq("id", productData.id)
               .limit(4)
           : Promise.resolve({ data: [] }),
-        // Les réservations ne sont plus lisibles directement : on passe par la fonction publique
         (supabase as any).rpc("get_booked_ranges", { p_product: productData.id }),
       ]);
 
@@ -121,14 +116,12 @@ function ProductPage() {
     };
   }, [slug]);
 
-  // Amène le client sur la confirmation dès qu'elle apparaît
   useEffect(() => {
     if (confirmation) {
       confirmationRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [confirmation]);
 
-  // Jours où il ne reste pas assez de stock pour la quantité demandée
   const disabledDays = useMemo(() => {
     const result: Date[] = [];
     if (!product) return result;
@@ -182,7 +175,6 @@ function ProductPage() {
     const startStr = format(from, "yyyy-MM-dd");
     const endStr = format(to, "yyyy-MM-dd");
 
-    // Contrôle côté serveur (le calendrier affiché peut être en retard)
     const { data: available } = await (supabase as any).rpc("get_available_quantity", {
       p_product: product.id,
       p_start: startStr,
@@ -196,7 +188,6 @@ function ProductPage() {
       return;
     }
 
-    // Création via la fonction SQL : validations + référence de suivi
     const { data: reference, error } = await (supabase as any).rpc("create_booking", {
       p_product: product.id,
       p_start: startStr,
@@ -211,7 +202,6 @@ function ProductPage() {
 
     if (error) {
       console.error(error);
-      // Les messages d'erreur « métier » viennent du serveur (en français)
       toast.error(error.code === "P0001" ? error.message : t("booking.errGeneric"));
       return;
     }
@@ -242,7 +232,6 @@ function ProductPage() {
     }
   };
 
-  // Message WhatsApp toujours en français : il est lu par l'équipe
   const whatsappUrl = confirmation
     ? `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
         `Bonjour, j'ai envoyé la demande de réservation ${confirmation.reference} : ${confirmation.quantity} × ${confirmation.productName} ` +
@@ -274,22 +263,23 @@ function ProductPage() {
 
   const imageUrl = product.image_url || "https://placehold.co/600x600?text=Pas+d'image";
   const isOutOfStock = product.stock <= 0;
+  const translatedName = getLocalizedField(product, "name", i18n.language);
+  const translatedDesc = getLocalizedField(product, "description", i18n.language);
 
   return (
     <SiteLayout>
       <section className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-2">
         <img
           src={imageUrl}
-          alt={product.name}
+          alt={translatedName}
           width={1024}
           height={1024}
           className={`w-full aspect-square object-cover ${isOutOfStock ? "opacity-50 grayscale" : ""}`}
         />
         <div className="flex flex-col justify-center">
           <Link to="/catalogue" className="text-primary uppercase tracking-[0.3em] text-xs">{categoryName}</Link>
-                    {/* NOUVEAU : Noms et descriptions traduits */}
-          <h1 className="text-5xl md:text-6xl mt-3">{getLocalizedField(product, "name", i18n.language)}</h1>
-          <p className="mt-6 text-muted-foreground leading-relaxed">{getLocalizedField(product, "description", i18n.language)}</p>
+          <h1 className="text-5xl md:text-6xl mt-3">{translatedName}</h1>
+          <p className="mt-6 text-muted-foreground leading-relaxed">{translatedDesc}</p>
 
           <p className="mt-8 text-3xl font-display">
             {formatPrice(product.price)} <span className="text-base text-muted-foreground font-sans">{t("product.perDay")}</span>
@@ -346,7 +336,6 @@ function ProductPage() {
         </div>
       </section>
 
-      {/* Confirmation de réservation (reste affichée jusqu'à fermeture) */}
       {confirmation && (
         <section ref={confirmationRef} className="mx-auto max-w-7xl px-6 pb-16" aria-live="polite">
           <div className="border-2 border-primary bg-primary/5 rounded-sm p-8">
@@ -416,14 +405,12 @@ function ProductPage() {
         </section>
       )}
 
-      {/* Section Réservation */}
       {showBookingForm && (
         <section className="mx-auto max-w-7xl px-6 pb-16">
           <div className="bg-zinc-50 border rounded-sm p-8">
             <h2 className="font-display text-3xl mb-6">{t("booking.title", { name: product.name })}</h2>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Calendrier */}
               <div>
                 <p className="text-sm text-zinc-600 mb-4">{t("booking.calendarHelp", { qty })}</p>
                 <div className="bg-white border p-4 inline-block">
@@ -439,7 +426,6 @@ function ProductPage() {
                 </div>
               </div>
 
-              {/* Formulaire */}
               <form onSubmit={handleBooking} className="space-y-4">
                 {dateRange?.from && dateRange?.to && (
                   <div className="bg-primary/10 border border-primary p-4 rounded">
