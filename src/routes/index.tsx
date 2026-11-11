@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Truck, Sparkles, Wrench, Clock, Star } from "lucide-react";
 import hero from "@/assets/hero.jpg";
 import { SiteLayout } from "@/components/SiteLayout";
@@ -20,14 +21,9 @@ export const Route = createFileRoute("/")({
   }),
   component: Index,
 });
-const perks = [
-  { icon: Truck, t: "Livraison", d: "Partout au Maroc" },
-  { icon: Wrench, t: "Montage", d: "Équipe technique dédiée" },
-  { icon: Sparkles, t: "Haut de gamme", d: "Matériel soigné et récent" },
-  { icon: Clock, t: "Devis 24h", d: "Réponse rapide garantie" },
-];
 
 function Index() {
+  const { t } = useTranslation();
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [avis, setAvis] = useState<any[]>([]);
 
@@ -46,18 +42,25 @@ function Index() {
       });
   }, []);
 
+  const perks = [
+    { icon: Truck, title: t("home.perks.delivery"), desc: t("home.perks.deliveryDesc") },
+    { icon: Wrench, title: t("home.perks.install"), desc: t("home.perks.installDesc") },
+    { icon: Sparkles, title: t("home.perks.premium"), desc: t("home.perks.premiumDesc") },
+    { icon: Clock, title: t("home.perks.quote24"), desc: t("home.perks.quote24Desc") },
+  ];
+
   return (
     <SiteLayout>
       <section className="relative h-[85vh] min-h-[560px] flex items-center">
-        <img src={hero} alt="Réception de mariage élégante" width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
+        <img src={hero} alt={t("home.hero.title")} width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-hero-overlay" />
         <div className="relative mx-auto max-w-7xl px-6 text-secondary-foreground">
-          <p className="text-primary uppercase tracking-[0.35em] text-xs animate-in fade-in slide-in-from-bottom-4 duration-700">Location événementielle</p>
-          <h1 className="mt-4 text-5xl md:text-8xl max-w-3xl leading-[0.95] animate-in fade-in slide-in-from-bottom-6 duration-1000">Donnez de l'éclat à vos événements</h1>
-          <p className="mt-6 max-w-lg opacity-80">Mariages, séminaires, galas : tout le matériel dont vous avez besoin, livré et installé.</p>
+          <p className="text-primary uppercase tracking-[0.35em] text-xs animate-in fade-in slide-in-from-bottom-4 duration-700">{t("home.hero.eyebrow")}</p>
+          <h1 className="mt-4 text-5xl md:text-8xl max-w-3xl leading-[0.95] animate-in fade-in slide-in-from-bottom-6 duration-1000">{t("home.hero.title")}</h1>
+          <p className="mt-6 max-w-lg opacity-80">{t("home.hero.subtitle")}</p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link to="/catalogue" className="bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90">Voir le catalogue</Link>
-            <Link to="/contact" className="border border-secondary-foreground/40 px-8 py-4 uppercase tracking-widest text-sm hover:bg-secondary-foreground hover:text-secondary">Demander un devis</Link>
+            <Link to="/catalogue" className="bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90">{t("home.hero.ctaCatalogue")}</Link>
+            <Link to="/devis" className="border border-secondary-foreground/40 px-8 py-4 uppercase tracking-widest text-sm hover:bg-secondary-foreground hover:text-secondary">{t("home.hero.ctaQuote")}</Link>
           </div>
         </div>
       </section>
@@ -65,9 +68,9 @@ function Index() {
       <section className="border-b">
         <div className="mx-auto max-w-7xl px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
           {perks.map((p) => (
-            <div key={p.t} className="flex items-center gap-4">
+            <div key={p.title} className="flex items-center gap-4">
               <p.icon className="h-8 w-8 text-primary shrink-0" strokeWidth={1.25} />
-              <div><p className="font-semibold">{p.t}</p><p className="text-sm text-muted-foreground">{p.d}</p></div>
+              <div><p className="font-semibold">{p.title}</p><p className="text-sm text-muted-foreground">{p.desc}</p></div>
             </div>
           ))}
         </div>
@@ -75,8 +78,8 @@ function Index() {
 
       <section className="mx-auto max-w-7xl px-6 py-24">
         <div className="text-center mb-14">
-          <p className="text-primary uppercase tracking-[0.3em] text-xs">Nos univers</p>
-          <h2 className="text-5xl mt-3">Catégories</h2>
+          <p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.categories.eyebrow")}</p>
+          <h2 className="text-5xl mt-3">{t("home.categories.title")}</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {categories.map((c) => (
@@ -95,8 +98,8 @@ function Index() {
       <section className="bg-muted py-24">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex items-end justify-between mb-12">
-            <div><p className="text-primary uppercase tracking-[0.3em] text-xs">Sélection</p><h2 className="text-5xl mt-3">Les plus demandés</h2></div>
-            <Link to="/catalogue" className="text-sm uppercase tracking-widest hover:text-primary">Tout voir →</Link>
+            <div><p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.selection.eyebrow")}</p><h2 className="text-5xl mt-3">{t("home.selection.title")}</h2></div>
+            <Link to="/catalogue" className="text-sm uppercase tracking-widest hover:text-primary">{t("home.selection.seeAll")}</Link>
           </div>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {products.slice(0, 4).map((p) => <ProductCard key={p.slug} p={p} />)}
@@ -104,13 +107,12 @@ function Index() {
         </div>
       </section>
 
-      {/* Section Avis clients */}
       {avis.length > 0 && (
         <section className="py-24 px-6 bg-[#FAF8F5]">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-14">
-              <p className="text-primary uppercase tracking-[0.3em] text-xs">Excellence & Confiance</p>
-              <h2 className="text-5xl mt-3">Ils nous font confiance</h2>
+              <p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.testimonials.eyebrow")}</p>
+              <h2 className="text-5xl mt-3">{t("home.testimonials.title")}</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {avis.map((a) => (
@@ -133,17 +135,16 @@ function Index() {
       )}
 
       <section className="bg-secondary text-secondary-foreground py-24 text-center px-6">
-        <h2 className="text-5xl md:text-6xl">Un projet d'événement ?</h2>
-        <p className="mt-4 opacity-70">Composez votre sélection et recevez un devis personnalisé sous 24h.</p>
-        <Link to="/devis" className="inline-block mt-8 bg-primary text-primary-foreground px-10 py-4 uppercase tracking-widest text-sm">Mon devis</Link>
+        <h2 className="text-5xl md:text-6xl">{t("home.cta.title")}</h2>
+        <p className="mt-4 opacity-70">{t("home.cta.subtitle")}</p>
+        <Link to="/devis" className="inline-block mt-8 bg-primary text-primary-foreground px-10 py-4 uppercase tracking-widest text-sm">{t("home.cta.button")}</Link>
       </section>
 
-      {/* Section Galerie */}
       <section className="bg-zinc-50 py-20">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-12">
-            <h2 className="font-display text-4xl md:text-5xl mb-4">Nos dernières réalisations</h2>
-            <p className="text-muted-foreground">Découvrez quelques-uns de nos événements récents</p>
+            <h2 className="font-display text-4xl md:text-5xl mb-4">{t("home.gallery.title")}</h2>
+            <p className="text-muted-foreground">{t("home.gallery.subtitle")}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {galleryPhotos.map((p: any) => (
@@ -153,13 +154,13 @@ function Index() {
             ))}
             {galleryPhotos.length === 0 && (
               <div className="col-span-3 text-center text-zinc-500 py-8">
-                Aucune photo pour le moment.
+                {t("home.gallery.empty")}
               </div>
             )}
           </div>
           <div className="text-center mt-12">
             <Link to="/realisations" className="inline-block border border-zinc-300 px-8 py-3 text-sm uppercase tracking-widest hover:bg-zinc-900 hover:text-white transition-colors">
-              Voir toutes nos réalisations
+              {t("home.gallery.seeAll")}
             </Link>
           </div>
         </div>
