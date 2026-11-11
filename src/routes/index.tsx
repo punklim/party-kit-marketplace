@@ -25,12 +25,14 @@ export const Route = createFileRoute("/")({
 function Index() {
   const { t, i18n } = useTranslation();
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
+  const [galleryLoading, setGalleryLoading] = useState(true);
   const [avis, setAvis] = useState<any[]>([]);
 
   useEffect(() => {
     (supabase as any).from("gallery").select("*").limit(3).then(({ data }: any) => {
       setGalleryPhotos(data || []);
-    });
+      setGalleryLoading(false);
+    }, () => setGalleryLoading(false));
     (supabase as any)
       .from("testimonials")
       .select("*")
@@ -156,7 +158,11 @@ function Index() {
                 <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
               </Link>
             ))}
-            {galleryPhotos.length === 0 && (
+            {galleryLoading &&
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="aspect-square rounded-sm bg-muted animate-pulse" aria-hidden="true" />
+              ))}
+            {!galleryLoading && galleryPhotos.length === 0 && (
               <div className="col-span-3 text-center text-zinc-500 py-8">
                 {t("home.gallery.empty")}
               </div>

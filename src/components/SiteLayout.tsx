@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Menu, X, Phone, Mail, MapPin, Instagram, Facebook, MessageCircle, Globe } from "lucide-react";
+import { toast } from "sonner";
 import { useQuote } from "@/lib/quote";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,15 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   useRestoreLanguage();
   useReveal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  // Header plus fin avec ombre dès qu'on descend (navigateur uniquement)
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
   const router = useRouterState();
   const pathname = router.location.pathname;
 
@@ -52,11 +62,11 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     const { error } = await (supabase as any).from("newsletter").insert({ email: emailInput.value });
 
     if (error) {
-      alert(error.code === "23505" ? t("newsletter.already") : t("newsletter.error"));
+      toast.error(error.code === "23505" ? t("newsletter.already") : t("newsletter.error"));
       btn.disabled = false;
       btn.textContent = t("newsletter.button");
     } else {
-      alert(t("newsletter.success"));
+      toast.success(t("newsletter.success"));
       emailInput.value = "";
       btn.textContent = t("newsletter.done");
     }
@@ -76,8 +86,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
         </div>
       </div>
 
-      <header className="bg-background border-b sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+      <header className={`bg-background border-b sticky top-0 z-40 transition-shadow duration-300 ${scrolled ? "shadow-md" : ""}`}>
+        <div className={`max-w-7xl mx-auto px-6 flex items-center justify-between transition-[height] duration-300 ${scrolled ? "h-16" : "h-20"}`}>
           <Link to="/" className="font-display text-3xl tracking-wide text-primary" dir="ltr">
             Éclat<span className="text-foreground">Events</span>
           </Link>
