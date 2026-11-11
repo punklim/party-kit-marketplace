@@ -1,7 +1,10 @@
 {
   "name": "tanstack_start_ts",
   "private": true,
-  "sideEffects": ["./src/locales/i18n.ts", "**/*.css"],
+  "sideEffects": [
+    "./src/locales/i18n.ts",
+    "**/*.css"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite dev",
