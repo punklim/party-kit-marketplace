@@ -152,3 +152,61 @@
 }
 @utility bg-hero-overlay { background-image: var(--gradient-hero); }
 @utility shadow-elegant { box-shadow: var(--shadow-elegant); }
+
+/* ===== Éclat Events : finitions d'animation ===== */
+
+/* 1. Apparition au scroll */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* 2. Soulignement animé du menu */
+.nav-link {
+  position: relative;
+}
+.nav-link::after {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: -6px;
+  height: 1px;
+  width: 0;
+  background: currentColor;
+  transition: width 0.3s ease;
+}
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* 3. Zoom lent sur la photo du héro */
+@keyframes hero-zoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.08); }
+}
+.hero-img {
+  animation: hero-zoom 14s ease-in-out infinite alternate;
+}
+
+/* 5. Respect de prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .hero-img {
+    animation: none;
+  }
+  .nav-link::after {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

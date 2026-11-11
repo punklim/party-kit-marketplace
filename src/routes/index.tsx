@@ -51,25 +51,25 @@ function Index() {
 
   return (
     <SiteLayout>
-      <section className="relative h-[85vh] min-h-[560px] flex items-center">
-        <img src={hero} alt={t("home.hero.title")} width={1920} height={1088} className="absolute inset-0 h-full w-full object-cover" />
+      <section className="relative h-[85vh] min-h-[560px] flex items-center overflow-hidden">
+        <img src={hero} alt={t("home.hero.title")} width={1920} height={1088} className="hero-img absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-hero-overlay" />
         <div className="relative mx-auto max-w-7xl px-6 text-secondary-foreground">
           <p className="text-primary uppercase tracking-[0.35em] text-xs animate-in fade-in slide-in-from-bottom-4 duration-700">{t("home.hero.eyebrow")}</p>
           <h1 className="mt-4 text-5xl md:text-8xl max-w-3xl leading-[0.95] animate-in fade-in slide-in-from-bottom-6 duration-1000">{t("home.hero.title")}</h1>
           <p className="mt-6 max-w-lg opacity-80">{t("home.hero.subtitle")}</p>
           <div className="mt-10 flex flex-wrap gap-4">
-            <Link to="/catalogue" className="bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90">{t("home.hero.ctaCatalogue")}</Link>
-            <Link to="/devis" className="border border-secondary-foreground/40 px-8 py-4 uppercase tracking-widest text-sm hover:bg-secondary-foreground hover:text-secondary">{t("home.hero.ctaQuote")}</Link>
+            <Link to="/catalogue" className="bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:opacity-95">{t("home.hero.ctaCatalogue")}</Link>
+            <Link to="/devis" className="border border-secondary-foreground/40 px-8 py-4 uppercase tracking-widest text-sm transition-all duration-300 hover:-translate-y-0.5 hover:bg-secondary-foreground hover:text-secondary">{t("home.hero.ctaQuote")}</Link>
           </div>
         </div>
       </section>
 
       <section className="border-b">
-        <div className="mx-auto max-w-7xl px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
+        <div data-reveal data-reveal-stagger className="mx-auto max-w-7xl px-6 py-10 grid grid-cols-2 md:grid-cols-4 gap-8">
           {perks.map((p) => (
-            <div key={p.title} className="flex items-center gap-4">
-              <p.icon className="h-8 w-8 text-primary shrink-0" strokeWidth={1.25} />
+            <div key={p.title} className="group flex items-center gap-4">
+              <p.icon className="h-8 w-8 text-primary shrink-0 transition-transform duration-300 group-hover:-translate-y-1" strokeWidth={1.25} />
               <div><p className="font-semibold">{p.title}</p><p className="text-sm text-muted-foreground">{p.desc}</p></div>
             </div>
           ))}
@@ -77,13 +77,12 @@ function Index() {
       </section>
 
       <section className="mx-auto max-w-7xl px-6 py-24">
-        <div className="text-center mb-14">
+        <div data-reveal className="text-center mb-14">
           <p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.categories.eyebrow")}</p>
           <h2 className="text-5xl mt-3">{t("home.categories.title")}</h2>
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {categories.map((c) => {
-            // NOUVEAU : Traduction des catégories sur l'accueil
+        <div data-reveal data-reveal-stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {categories.map((c) => {
             const catName = getLocalizedField(c, "name", i18n.language);
             const catDesc = getLocalizedField(c, "description", i18n.language);
             return (
@@ -102,11 +101,11 @@ function Index() {
 
       <section className="bg-muted py-24">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="flex items-end justify-between mb-12">
+          <div data-reveal className="flex items-end justify-between mb-12">
             <div><p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.selection.eyebrow")}</p><h2 className="text-5xl mt-3">{t("home.selection.title")}</h2></div>
-            <Link to="/catalogue" className="text-sm uppercase tracking-widest hover:text-primary">{t("home.selection.seeAll")}</Link>
+            <Link to="/catalogue" className="nav-link text-sm uppercase tracking-widest hover:text-primary transition-colors">{t("home.selection.seeAll")}</Link>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div data-reveal data-reveal-stagger className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {products.slice(0, 4).map((p) => <ProductCard key={p.slug} p={p} />)}
           </div>
         </div>
@@ -115,13 +114,13 @@ function Index() {
       {avis.length > 0 && (
         <section className="py-24 px-6 bg-[#FAF8F5]">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-14">
+            <div data-reveal className="text-center mb-14">
               <p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.testimonials.eyebrow")}</p>
               <h2 className="text-5xl mt-3">{t("home.testimonials.title")}</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div data-reveal data-reveal-stagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {avis.map((a) => (
-                <div key={a.id} className="bg-white border rounded-sm shadow-sm p-6">
+                <div key={a.id} className="bg-white border rounded-sm shadow-sm p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <div className="flex gap-1 mb-4">
                     {Array.from({ length: 5 }).map((_, i) => (
                       <Star key={i} className={`h-4 w-4 ${i < a.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-300"}`} />
@@ -139,19 +138,19 @@ function Index() {
         </section>
       )}
 
-      <section className="bg-secondary text-secondary-foreground py-24 text-center px-6">
+      <section data-reveal className="bg-secondary text-secondary-foreground py-24 text-center px-6">
         <h2 className="text-5xl md:text-6xl">{t("home.cta.title")}</h2>
         <p className="mt-4 opacity-70">{t("home.cta.subtitle")}</p>
-        <Link to="/devis" className="inline-block mt-8 bg-primary text-primary-foreground px-10 py-4 uppercase tracking-widest text-sm">{t("home.cta.button")}</Link>
+        <Link to="/devis" className="inline-block mt-8 bg-primary text-primary-foreground px-10 py-4 uppercase tracking-widest text-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">{t("home.cta.button")}</Link>
       </section>
 
       <section className="bg-zinc-50 py-20">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-12">
+          <div data-reveal className="text-center mb-12">
             <h2 className="font-display text-4xl md:text-5xl mb-4">{t("home.gallery.title")}</h2>
             <p className="text-muted-foreground">{t("home.gallery.subtitle")}</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div data-reveal data-reveal-stagger className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {galleryPhotos.map((p: any) => (
               <Link key={p.id} to="/realisations" className="aspect-square overflow-hidden rounded-sm group">
                 <img src={p.image_url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />

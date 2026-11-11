@@ -4,19 +4,18 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { formatPrice } from "@/data/catalog";
 import { useQuote } from "@/lib/quote";
-import { getLocalizedField } from "@/lib/use-locale"; // NOUVEL IMPORT
+import { getLocalizedField } from "@/lib/use-locale";
 
 export function ProductCard({ p }: { p: any }) {
   const { t, i18n } = useTranslation();
   const { add } = useQuote();
   const imageUrl = p.image_url || p.image || "https://placehold.co/600x600?text=Pas+d'image";
   const isOutOfStock = p.stock !== undefined && p.stock <= 0;
-  
-  // NOUVEAU : On récupère le nom traduit
+
   const translatedName = getLocalizedField(p, "name", i18n.language);
 
   return (
-    <div className="group bg-card border hover:shadow-elegant transition-shadow relative">
+    <div className="group bg-card border relative transition-all duration-300 hover:-translate-y-1.5 hover:shadow-elegant">
       <Link to="/produit/$slug" params={{ slug: p.slug }} className="block overflow-hidden aspect-square">
         <img
           src={imageUrl}
@@ -35,9 +34,13 @@ export function ProductCard({ p }: { p: any }) {
       )}
 
       <div className="p-5">
-        <Link to="/produit/$slug" params={{ slug: p.slug }} className="font-display text-2xl hover:text-primary">{translatedName}</Link>
+        <Link to="/produit/$slug" params={{ slug: p.slug }} className="font-display text-2xl hover:text-primary transition-colors">
+          {translatedName}
+        </Link>
         <div className="mt-3 flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">{t("product.from")} <span className="text-foreground font-semibold">{formatPrice(p.price)}</span></p>
+          <p className="text-sm text-muted-foreground">
+            {t("product.from")} <span className="text-foreground font-semibold">{formatPrice(p.price)}</span>
+          </p>
           <button
             onClick={() => {
               if (isOutOfStock) {
@@ -49,7 +52,7 @@ export function ProductCard({ p }: { p: any }) {
             }}
             disabled={isOutOfStock}
             aria-label={t("product.addToQuote")}
-            className={`h-9 w-9 flex items-center justify-center transition-colors ${
+            className={`h-11 w-11 flex items-center justify-center transition-colors ${
               isOutOfStock
                 ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
                 : "bg-secondary text-secondary-foreground hover:bg-primary hover:text-primary-foreground"

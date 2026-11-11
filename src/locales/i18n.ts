@@ -42,6 +42,22 @@ const resources = {
       "social.subtitle": "Actualités et inspirations en temps réel",
       "social.follow": "Suivez-nous",
 
+      // Menu et Footer (Nouveaux)
+      "nav.menu": "Menu",
+      "nav.myBookings": "Mes réservations",
+      "nav.review": "Laisser un avis",
+      "topbar.whatsappMessage": "Bonjour Éclat Events, je souhaite avoir des informations.",
+      "footer.about": "Location de matériel événementiel haut de gamme au Maroc. Dirigée par une équipe passionnée.",
+      "footer.navigation": "Navigation",
+      "footer.services": "Services",
+      "footer.cgv": "CGV",
+      "footer.faq": "FAQ",
+      "footer.address": "Sidi Maarouf, Al Mostakbal, Casablanca, Maroc",
+      "service.mobilier": "Mobilier",
+      "service.tentes": "Tentes & Chapiteaux",
+      "service.sonLumiere": "Son & Lumière",
+      "service.artTable": "Art de la table",
+
       // Communs
       "common.days_one": "{{count}} jour",
       "common.days_other": "{{count}} jours",
@@ -261,6 +277,22 @@ const resources = {
       "social.subtitle": "News and inspirations in real time",
       "social.follow": "Follow us",
 
+      // Menu and Footer (New)
+      "nav.menu": "Menu",
+      "nav.myBookings": "My bookings",
+      "nav.review": "Leave a review",
+      "topbar.whatsappMessage": "Hello Éclat Events, I would like some information.",
+      "footer.about": "Premium event equipment rental in Morocco, run by a passionate team.",
+      "footer.navigation": "Navigation",
+      "footer.services": "Services",
+      "footer.cgv": "Terms of sale",
+      "footer.faq": "FAQ",
+      "footer.address": "Sidi Maarouf, Al Mostakbal, Casablanca, Morocco",
+      "service.mobilier": "Furniture",
+      "service.tentes": "Tents & Marquees",
+      "service.sonLumiere": "Sound & Lighting",
+      "service.artTable": "Tableware",
+
       "common.days_one": "{{count}} day",
       "common.days_other": "{{count}} days",
       "common.units_one": "{{count}} unit",
@@ -469,6 +501,22 @@ const resources = {
       "social.title": "انضم إلى مجتمعنا",
       "social.subtitle": "أخبار وإلهام في الوقت الفعلي",
       "social.follow": "تابعنا",
+
+      // Menu and Footer (New)
+      "nav.menu": "القائمة",
+      "nav.myBookings": "حجوزاتي",
+      "nav.review": "اترك تقييمًا",
+      "topbar.whatsappMessage": "مرحبًا Éclat Events، أرغب في الحصول على معلومات.",
+      "footer.about": "كراء معدات الحفلات الفاخرة في المغرب، بإشراف فريق شغوف.",
+      "footer.navigation": "التنقل",
+      "footer.services": "الخدمات",
+      "footer.cgv": "شروط البيع",
+      "footer.faq": "الأسئلة الشائعة",
+      "footer.address": "سيدي معروف، المستقبل، الدار البيضاء، المغرب",
+      "service.mobilier": "الأثاث",
+      "service.tentes": "الخيام والسرادق",
+      "service.sonLumiere": "الصوت والإضاءة",
+      "service.artTable": "أدوات المائدة",
 
       "common.days_zero": "{{count}} يوم",
       "common.days_one": "يوم واحد",
