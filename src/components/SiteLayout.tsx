@@ -20,8 +20,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
   const navLinks = [
     { to: "/", label: t("nav.home") },
     { to: "/catalogue", label: t("nav.catalogue") },
-    { to: "/realisations", label: "Réalisations" },
-    { to: "/blog", label: "Blog" },
+    { to: "/realisations", label: t("nav.realisations") },
+    { to: "/blog", label: t("nav.blog") },
     { to: "/a-propos", label: t("nav.about") },
     { to: "/contact", label: t("nav.contact") },
   ];
