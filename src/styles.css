@@ -214,3 +214,18 @@
 html[lang="ar"] :where(body, body *):not([dir="ltr"], [dir="ltr"] *) {
   font-family: "Cairo", sans-serif;
 }
+/* Animation du carrousel d'avis */
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(-320px * 3 - 1.5rem * 3)); }
+}
+
+/* En arabe (RTL), on inverse la direction */
+html[dir="rtl"] .animate-\[marquee_40s_linear_infinite\] {
+  animation-name: marquee-rtl;
+}
+
+@keyframes marquee-rtl {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(calc(320px * 3 + 1.5rem * 3)); }
+}

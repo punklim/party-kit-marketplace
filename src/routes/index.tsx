@@ -113,31 +113,43 @@ function Index() {
         </div>
       </section>
 
+            {/* Section Avis clients - Carrousel */}
       {avis.length > 0 && (
-        <section className="py-24 px-6 bg-[#FAF8F5]">
+        <motion.section 
+          initial={{ opacity: 0, y: 30 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ duration: 0.6 }}
+          className="py-24 px-6 bg-[#FAF8F5] overflow-hidden"
+        >
           <div className="max-w-7xl mx-auto">
-            <div data-reveal className="text-center mb-14">
+            <div className="text-center mb-14">
               <p className="text-primary uppercase tracking-[0.3em] text-xs">{t("home.testimonials.eyebrow")}</p>
               <h2 className="text-5xl mt-3">{t("home.testimonials.title")}</h2>
             </div>
-            <div data-reveal data-reveal-stagger className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {avis.map((a) => (
-                <div key={a.id} className="bg-white border rounded-sm shadow-sm p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-                  <div className="flex gap-1 mb-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-4 w-4 ${i < a.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-300"}`} />
-                    ))}
+            
+            {/* Carrousel CSS infini (marquee) */}
+            <div className="relative">
+              <div className="flex gap-6 animate-[marquee_40s_linear_infinite] hover:[animation-play-state:paused] w-max">
+                {/* On duplique les avis pour l'effet infini */}
+                {[...avis, ...avis, ...avis].map((a, idx) => (
+                  <div key={`${a.id}-${idx}`} className="w-[320px] shrink-0 bg-white border rounded-sm shadow-sm p-6">
+                    <div className="flex gap-1 mb-4">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star key={i} className={`h-4 w-4 ${i < a.rating ? "fill-yellow-400 text-yellow-400" : "text-zinc-300"}`} />
+                      ))}
+                    </div>
+                    <p className="text-sm italic text-zinc-700 mb-6 line-clamp-4">"{a.content}"</p>
+                    <div className="pt-4 border-t">
+                      <p className="font-semibold text-zinc-900">{a.name}</p>
+                      {a.role && <p className="text-xs text-muted-foreground">{a.role}</p>}
+                    </div>
                   </div>
-                  <p className="text-sm italic text-zinc-700 mb-6">"{a.content}"</p>
-                  <div className="pt-4 border-t">
-                    <p className="font-semibold text-zinc-900">{a.name}</p>
-                    {a.role && <p className="text-xs text-muted-foreground">{a.role}</p>}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </section>
+        </motion.section>
       )}
 
       <section data-reveal className="bg-secondary text-secondary-foreground py-24 text-center px-6">
