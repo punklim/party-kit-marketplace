@@ -243,6 +243,14 @@ const resources = {
       "realisations.subtitle": "Découvrez nos plus beaux événements",
       "realisations.empty": "Aucune photo pour le moment. Revenez bientôt !",
       "realisations.close": "Fermer",
+
+      // Erreurs
+      "error.notFoundTitle": "Cette page n'existe pas",
+      "error.notFoundText": "Il semblerait que vous vous soyez égaré. Pas d'inquiétude, revenons à l'essentiel.",
+      "error.errorTitle": "Une erreur est survenue",
+      "error.errorText": "Quelque chose s'est mal passé de notre côté. Veuillez réessayer ou revenir à l'accueil.",
+      "error.retry": "Réessayer",
+      "error.backHome": "Retour à l'accueil",
     }
   },
   en: {
@@ -468,6 +476,14 @@ const resources = {
       "realisations.subtitle": "Discover our finest events",
       "realisations.empty": "No photos yet. Come back soon!",
       "realisations.close": "Close",
+
+      // Errors
+      "error.notFoundTitle": "This page doesn't exist",
+      "error.notFoundText": "It seems you got lost. Don't worry, let's get back on track.",
+      "error.errorTitle": "An error occurred",
+      "error.errorText": "Something went wrong on our end. Please try again or go back home.",
+      "error.retry": "Try again",
+      "error.backHome": "Back to home",
     }
   },
   ar: {
@@ -709,6 +725,14 @@ const resources = {
       "realisations.subtitle": "اكتشف أجمل مناسباتنا",
       "realisations.empty": "لا توجد صور حاليًا. عد قريبًا!",
       "realisations.close": "إغلاق",
+
+      // Errors
+      "error.notFoundTitle": "هذه الصفحة غير موجودة",
+      "error.notFoundText": "يبدو أنك تهت. لا تقلق، دعنا نعد إلى الأساسيات.",
+      "error.errorTitle": "حدث خطأ",
+      "error.errorText": "حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى أو العودة إلى الرئيسية.",
+      "error.retry": "حاول مرة أخرى",
+      "error.backHome": "العودة إلى الرئيسية",
     }
   }
 };

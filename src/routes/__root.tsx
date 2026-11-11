@@ -1,7 +1,8 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { CookieBanner } from "../components/CookieBanner";
-
+import { useTranslation } from "react-i18next";
+import { ArrowLeft, Home } from "lucide-react";
 import {
   Outlet,
   Link,
@@ -21,20 +22,26 @@ import { WhatsAppButton } from "../components/WhatsAppButton";
 import "../locales/i18n";
 
 function NotFoundComponent() {
+  const { t } = useTranslation();
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] px-6 text-center">
+      <div className="max-w-2xl">
+        <p className="text-primary uppercase tracking-[0.35em] text-sm mb-6">Éclat Events</p>
+        <h1 className="text-7xl md:text-9xl font-display text-secondary mb-6">404</h1>
+        <h2 className="text-3xl md:text-4xl font-display mb-4">
+          {t("error.notFoundTitle") || "Cette page n'existe pas"}
+        </h2>
+        <p className="text-muted-foreground mb-10 text-lg">
+          {t("error.notFoundText") || "Il semblerait que vous vous soyez égaré. Pas d'inquiétude, revenons à l'essentiel."}
         </p>
-        <div className="mt-6">
+        
+        <div className="flex flex-wrap gap-4 justify-center">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Go home
+            <Home className="h-4 w-4" />
+            {t("error.backHome") || "Retour à l'accueil"}
           </Link>
         </div>
       </div>
@@ -44,37 +51,51 @@ function NotFoundComponent() {
 
 function ErrorComponent({ error, reset }: ErrorComponentProps) {
   console.error(error);
+  const { t } = useTranslation();
   const router = useRouter();
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#FAF8F5] px-6 text-center">
+      <div className="max-w-2xl">
+        <p className="text-primary uppercase tracking-[0.35em] text-sm mb-6">Éclat Events</p>
+        <h2 className="text-3xl md:text-5xl font-display mb-4">
+          {t("error.errorTitle") || "Une erreur est survenue"}
+        </h2>
+        <p className="text-muted-foreground mb-10 text-lg">
+          {t("error.errorText") || "Quelque chose s'est mal passé de notre côté. Veuillez réessayer ou revenir à l'accueil."}
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        
+        <div className="flex flex-wrap gap-4 justify-center">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90 transition-all duration-300"
           >
-            Try again
+            <ArrowLeft className="h-4 w-4" />
+            {t("error.retry") || "Réessayer"}
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center gap-2 border border-secondary px-8 py-4 uppercase tracking-widest text-sm hover:bg-secondary hover:text-secondary-foreground transition-all duration-300"
           >
-            Go home
+            <Home className="h-4 w-4" />
+            {t("error.backHome") || "Retour à l'accueil"}
           </a>
         </div>
+
+        {error && error.message && (
+          <details className="mt-12 text-xs text-muted-foreground">
+            <summary className="cursor-pointer hover:text-foreground">Détails techniques</summary>
+            <pre className="mt-2 p-4 bg-black/5 rounded text-left overflow-auto max-w-full">
+              {error.message}
+            </pre>
+          </details>
+        )}
       </div>
     </div>
   );
@@ -106,7 +127,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@400;500;600&display=swap" },      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@400;500;600&display=swap" },
+      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
   shellComponent: RootShell,
