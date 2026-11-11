@@ -14,8 +14,7 @@ export const Route = createFileRoute("/catalogue/$categorie")({
         { property: "og:title", content: `${name} en location — Éclat Events` },
         { property: "og:description", content: `Location de ${name.toLowerCase()} haut de gamme au Maroc.` },
         { property: "og:type", content: "website" },
-        { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },
-      ],
+        { property: "og:image", content: "https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=1200&h=630&fit=crop" },      ],
     };
   },
   component: CategoriePage,

@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type FormEvent } from "react";
-import { differenceInCalendarDays, parseISO } from "date-fns";
+import { useTranslation } from "react-i18next";
+import { differenceInCalendarDays, format, parseISO } from "date-fns";
 import { SiteLayout } from "@/components/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { formatPrice } from "@/data/catalog";
+import { useDateLocale } from "@/lib/use-locale";
 import { Loader2, Search, Calendar, Clock, CheckCircle, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/mes-reservations")({
@@ -31,6 +33,8 @@ type Reservation = {
 const field = "w-full border bg-card px-4 py-3 text-sm focus:outline-none focus:border-primary";
 
 function MesReservations() {
+  const { t } = useTranslation();
+  const dateLocale = useDateLocale();
   const [email, setEmail] = useState("");
   const [reference, setReference] = useState("");
   const [reservations, setReservations] = useState<Reservation[] | null>(null);
@@ -54,7 +58,7 @@ function MesReservations() {
 
     if (err) {
       console.error(err);
-      setError("Une erreur est survenue. Réessayez dans un instant.");
+      setError(t("reservations.error"));
       return;
     }
 
@@ -65,37 +69,34 @@ function MesReservations() {
     if (status === "confirme")
       return (
         <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-          <CheckCircle className="h-3 w-3" /> Confirmée
+          <CheckCircle className="h-3 w-3" /> {t("reservations.statusConfirmed")}
         </span>
       );
     if (status === "annule")
       return (
         <span className="inline-flex items-center gap-1 bg-red-100 text-red-800 px-3 py-1 rounded-full text-xs font-semibold">
-          <XCircle className="h-3 w-3" /> Annulée
+          <XCircle className="h-3 w-3" /> {t("reservations.statusCancelled")}
         </span>
       );
     return (
       <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-semibold">
-        <Clock className="h-3 w-3" /> En attente
+        <Clock className="h-3 w-3" /> {t("reservations.statusPending")}
       </span>
     );
   };
 
-  const formatDate = (d: string) =>
-    parseISO(d).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  const formatDate = (d: string) => format(parseISO(d), "dd MMMM yyyy", { locale: dateLocale });
 
   return (
     <SiteLayout>
       <section className="mx-auto max-w-4xl px-6 py-16">
-        <h1 className="text-5xl md:text-6xl mb-4">Mes réservations</h1>
-        <p className="text-muted-foreground mb-10">
-          Entrez l'email utilisé lors de votre réservation et la référence reçue à l'envoi de votre demande.
-        </p>
+        <h1 className="text-5xl md:text-6xl mb-4">{t("reservations.title")}</h1>
+        <p className="text-muted-foreground mb-10">{t("reservations.intro")}</p>
 
         <form onSubmit={handleSearch} className="grid gap-3 max-w-xl mb-12">
           <div>
             <label htmlFor="suivi-email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">
-              Adresse email
+              {t("reservations.emailLabel")}
             </label>
             <input
               id="suivi-email"
@@ -104,13 +105,14 @@ function MesReservations() {
               maxLength={150}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="vous@exemple.com"
+              placeholder={t("reservations.emailPlaceholder")}
               className={field}
+              dir="ltr"
             />
           </div>
           <div>
             <label htmlFor="suivi-ref" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-1 block">
-              Référence de réservation
+              {t("reservations.refLabel")}
             </label>
             <input
               id="suivi-ref"
@@ -120,6 +122,7 @@ function MesReservations() {
               onChange={(e) => setReference(e.target.value)}
               placeholder="RS-2026-0001-A3F9C"
               className={`${field} font-mono`}
+              dir="ltr"
             />
           </div>
           <button
@@ -128,7 +131,7 @@ function MesReservations() {
             className="bg-[#D4AF37] text-black px-6 py-3 text-sm font-medium rounded hover:bg-[#c4a030] flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
-            Retrouver mes réservations
+            {t("reservations.submit")}
           </button>
         </form>
 
@@ -136,15 +139,15 @@ function MesReservations() {
 
         {reservations && reservations.length === 0 && (
           <div className="border p-12 text-center text-muted-foreground">
-            Aucune réservation trouvée. Vérifiez l'email et la référence saisis.
+            {t("reservations.notFound")}
             <br />
-            <Link to="/catalogue" className="text-primary underline mt-4 inline-block">Parcourir le catalogue</Link>
+            <Link to="/catalogue" className="text-primary underline mt-4 inline-block">{t("quote.browse")}</Link>
           </div>
         )}
 
         {reservations && reservations.length > 0 && (
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">{reservations.length} réservation(s) trouvée(s)</p>
+            <p className="text-sm text-muted-foreground">{t("reservations.found", { count: reservations.length })}</p>
             {reservations.map((r) => {
               const days = differenceInCalendarDays(parseISO(r.end_date), parseISO(r.start_date)) + 1;
               const qty = r.quantity ?? 1;
@@ -154,15 +157,17 @@ function MesReservations() {
                     {r.product_image && (
                       <img
                         src={r.product_image}
-                        alt={r.product_name ?? "Produit"}
+                        alt={r.product_name ?? t("reservations.productFallback")}
                         className="w-full md:w-48 h-48 md:h-auto object-cover"
                       />
                     )}
                     <div className="flex-1 p-6">
                       <div className="flex justify-between items-start mb-4 gap-4">
                         <div>
-                          <h2 className="font-display text-2xl">{r.product_name || "Produit"}</h2>
-                          <p className="text-xs text-muted-foreground font-mono">Réf. {r.reference}</p>
+                          <h2 className="font-display text-2xl">{r.product_name || t("reservations.productFallback")}</h2>
+                          <p className="text-xs text-muted-foreground font-mono" dir="ltr">
+                            {t("reservations.ref", { reference: r.reference })}
+                          </p>
                         </div>
                         {getStatusBadge(r.status)}
                       </div>
@@ -170,19 +175,19 @@ function MesReservations() {
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Calendar className="h-4 w-4 text-[#D4AF37]" />
-                          Du {formatDate(r.start_date)} au {formatDate(r.end_date)}
+                          {t("booking.fromTo", { start: formatDate(r.start_date), end: formatDate(r.end_date) })}
                         </div>
                         <div className="flex items-center gap-2 text-muted-foreground">
                           <Clock className="h-4 w-4 text-[#D4AF37]" />
-                          {days} jour{days > 1 ? "s" : ""} · Quantité : {qty}
+                          {t("common.days", { count: days })} · {t("reservations.quantity", { count: qty })}
                         </div>
                       </div>
 
                       <div className="flex justify-between items-center mt-6 pt-4 border-t gap-4">
                         <span className="text-xs text-muted-foreground">
-                          {r.status === "confirme" && "Réservation confirmée. Nous vous contacterons pour la livraison."}
-                          {r.status === "en_attente" && "En attente de confirmation par notre équipe."}
-                          {r.status === "annule" && "Cette réservation a été annulée."}
+                          {r.status === "confirme" && t("reservations.msgConfirmed")}
+                          {r.status === "en_attente" && t("reservations.msgPending")}
+                          {r.status === "annule" && t("reservations.msgCancelled")}
                         </span>
                         <span className="font-display text-xl font-bold text-[#D4AF37] whitespace-nowrap">
                           {formatPrice(Number(r.product_price ?? 0) * qty * days)}

@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SiteLayout, PageHeader } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/catalogue/")({
 });
 
 function Catalogue() {
+  const { t } = useTranslation();
   const { categorie } = Route.useSearch();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
@@ -31,7 +33,7 @@ function Catalogue() {
     const fetchData = async () => {
       const { data: catData } = await (supabase as any).from("categories").select("*");
       const { data: prodData } = await (supabase as any).from("products").select("*").order("created_at", { ascending: false });
-      
+
       setCategories(catData || []);
       setProducts(prodData || []);
       setLoading(false);
@@ -50,22 +52,22 @@ function Catalogue() {
   }
 
   // Filtrer les produits si une catégorie est sélectionnée
-  const list = categorie 
+  const list = categorie
     ? products.filter((p) => {
         // On cherche la catégorie correspondante pour avoir son ID
-        const cat = categories.find(c => c.slug === categorie);
+        const cat = categories.find((c) => c.slug === categorie);
         return cat ? p.category_id === cat.id : false;
-      }) 
+      })
     : products;
 
   const pill = "px-5 py-2 text-xs uppercase tracking-widest border transition-colors";
 
   return (
     <SiteLayout>
-      <PageHeader title="Catalogue" subtitle="Tout le matériel pour réussir votre événement" />
+      <PageHeader title={t("catalogue.title")} subtitle={t("catalogue.subtitle")} />
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex flex-wrap gap-3 justify-center mb-12">
-          <Link to="/catalogue" search={{}} className={`${pill} ${!categorie ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>Tout</Link>
+          <Link to="/catalogue" search={{}} className={`${pill} ${!categorie ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>{t("catalogue.all")}</Link>
           {categories.map((c) => (
             <Link key={c.slug} to="/catalogue" search={{ categorie: c.slug }} className={`${pill} ${categorie === c.slug ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>{c.name}</Link>
           ))}
@@ -75,7 +77,7 @@ function Catalogue() {
         </div>
         {list.length === 0 && (
           <div className="text-center py-12 text-muted-foreground">
-            Aucun produit disponible dans cette catégorie pour le moment.
+            {t("catalogue.empty")}
           </div>
         )}
       </section>
