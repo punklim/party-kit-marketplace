@@ -1,1 +1,0 @@
-var e=`/assets/tentes-BDYFlNa3.jpg`;export{e as t};
