@@ -7,6 +7,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { categories, products } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
+import { getLocalizedField } from "@/lib/use-locale";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [

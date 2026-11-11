@@ -1,0 +1,117 @@
+import { n as require_jsx_runtime } from "../_libs/react+tanstack__react-query.mjs";
+import { n as SiteLayout, t as PageHeader } from "./SiteLayout-BjHyiP9x.mjs";
+//#region node_modules/.nitro/vite/services/ssr/assets/cgv-CdM1qAb0.js
+var import_jsx_runtime = require_jsx_runtime();
+function CGV() {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(SiteLayout, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(PageHeader, {
+		title: "Conditions Générales de Vente",
+		subtitle: "Règles applicables à toutes les réservations et locations."
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("section", {
+		className: "mx-auto max-w-4xl px-6 py-16 prose prose-lg",
+		children: [
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "1. Objet"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Les présentes Conditions Générales de Vente (CGV) régissent les relations contractuelles entre Éclat Events (le \"Loueur\") et toute personne physique ou morale (le \"Client\") souhaitant louer du matériel événementiel via le site party-kit-marketplace.vercel.app."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "2. Commande et réservation"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Le Client passe sa commande via le formulaire de devis ou de réservation du site. La réservation est considérée comme définitive après confirmation par email et versement de la caution mentionnée à l'article 5. Éclat Events se réserve le droit de refuser une réservation en cas d'indisponibilité du matériel ou de données incomplètes."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "3. Prix et paiement"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Les prix sont indiqués en dirhams marocains (MAD), par jour et par unité. Le total affiché lors du devis inclut uniquement le prix de location. Les frais de livraison et de montage sont indiqués séparément avant validation. Le paiement s'effectue selon les modalités convenues avec l'agence (espèces, virement, chèque). Tout retard de paiement peut entraîner des pénalités."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "4. Livraison et montage"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "La livraison et le montage sont assurés par Éclat Events ou ses partenaires, dans les zones et délais convenus lors de la commande. Le Client doit être présent pour réceptionner le matériel et vérifier son état. Tout dommage constaté à la livraison doit être signalé immédiatement."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "5. Caution"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Une caution peut être demandée avant la livraison. Elle est fixée en fonction de la valeur du matériel loué. La caution est restituée au Client dans un délai de 7 jours après le retour du matériel, déduction faite des éventuels dommages constatés."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "6. Annulation et modification"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Toute annulation doit être notifiée par écrit. Les conditions de remboursement sont les suivantes :"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("ul", {
+				className: "list-disc pl-6 mb-4 space-y-1",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Annulation à plus de 15 jours : remboursement intégral (hors caution)." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Annulation entre 7 et 15 jours : retenue de 30% du montant total." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Annulation à moins de 7 jours : retenue de 50% du montant total." }),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("li", { children: "Annulation à moins de 48 heures : aucun remboursement." })
+				]
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "7. Dégradations et pertes"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Le Client est responsable du matériel loué pendant toute la durée de la location. En cas de casse, de perte ou de vol, le Client s'engage à indemniser Éclat Events à hauteur de la valeur du matériel endommagé ou perdu, telle qu'indiquée dans le contrat ou la facture."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "8. Obligations du Client"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Le Client s'engage à utiliser le matériel conformément à sa destination et aux règles de sécurité, à ne pas le sous-louer et à le restituer dans l'état où il l'a reçu, à la date convenue."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "9. Force majeure"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Éclat Events ne saurait être tenue responsable d'un retard ou d'une inexécution dus à un cas de force majeure (intempéries, grèves, décisions administratives, etc.)."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "10. Droit de rétractation"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Conformément à la loi 31-08 relative à la protection du consommateur, le Client dispose d'un délai de 7 jours pour exercer son droit de rétractation pour toute commande à distance. Ce droit ne s'applique pas pour les prestations urgentes ou les locations à moins de 7 jours."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h2", {
+				className: "font-display text-3xl mt-8 mb-4",
+				children: "11. Droit applicable et litiges"
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+				className: "mb-4",
+				children: "Les présentes CGV sont soumises au droit marocain. En cas de litige, une solution amiable sera recherchée en priorité. À défaut, les tribunaux de Casablanca seront seuls compétents."
+			}),
+			/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("p", {
+				className: "mt-8 text-sm text-muted-foreground italic",
+				children: ["Dernière mise à jour : ", (/* @__PURE__ */ new Date()).toLocaleDateString("fr-FR")]
+			})
+		]
+	})] });
+}
+//#endregion
+export { CGV as component };

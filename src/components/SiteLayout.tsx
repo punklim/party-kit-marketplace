@@ -5,9 +5,10 @@ import { useState } from "react";
 import { useQuote } from "@/lib/quote";
 import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
-
+import { useRestoreLanguage } from "@/lib/use-locale";
 export function SiteLayout({ children }: { children: ReactNode }) {
   const { count } = useQuote();
+  useRestoreLanguage();
   const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const router = useRouterState();
@@ -39,8 +40,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
     btn.disabled = true;
     btn.textContent = "Inscription...";
 
-    const { error } = await supabase.from("newsletter").insert({ email: emailInput.value });
-
+     const { error } = await (supabase as any).from("newsletter").insert({ email: emailInput.value });
     if (error) {
       alert("Cette adresse est déjà inscrite ou une erreur est survenue.");
       btn.disabled = false;
@@ -286,7 +286,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 
         <div className="max-w-7xl mx-auto px-6 mt-12 pt-8 border-t border-zinc-800 text-xs flex flex-col md:flex-row justify-between items-center gap-4">
           <p>&copy; {new Date().getFullYear()} Éclat Events. {t("footer.rights")}</p>
-                    <div className="flex flex-wrap gap-4">
+            <div className="flex flex-wrap gap-4">
             <Link to="/mentions-legales" className="hover:text-white transition-colors">Mentions légales</Link>
             <Link to="/confidentialite" className="hover:text-white transition-colors">Confidentialité</Link>
             <Link to="/cgv" className="hover:text-white transition-colors">CGV</Link>
