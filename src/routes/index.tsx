@@ -7,7 +7,6 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { categories, products } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
-import { getLocalizedField } from "@/lib/use-locale";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -23,7 +22,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [galleryPhotos, setGalleryPhotos] = useState<any[]>([]);
   const [avis, setAvis] = useState<any[]>([]);
 

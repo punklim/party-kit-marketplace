@@ -6,7 +6,6 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { formatPrice } from "@/data/catalog";
 import { useQuote } from "@/lib/quote";
-import { useDateLocale, useTextDirection } from "@/lib/use-locale";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Calendar as CalendarIcon, Check, Copy, MessageCircle, X } from "lucide-react";
 import { DayPicker, type DateRange } from "react-day-picker";
@@ -45,7 +44,7 @@ const WHATSAPP_NUMBER = "212691055597";
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const dateLocale = useDateLocale();
   const dir = useTextDirection();
   const [product, setProduct] = useState<any>(null);
