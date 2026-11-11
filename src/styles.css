@@ -210,3 +210,7 @@
     scroll-behavior: auto;
   }
 }
+/* 14. Police arabe : s'applique seulement quand la langue est AR */
+html[lang="ar"] :where(body, body *):not([dir="ltr"], [dir="ltr"] *) {
+  font-family: "Cairo", sans-serif;
+}
