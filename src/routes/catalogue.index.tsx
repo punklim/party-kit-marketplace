@@ -5,6 +5,7 @@ import { SiteLayout, PageHeader } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2 } from "lucide-react";
+import { getLocalizedField } from "@/lib/use-locale"; // NOUVEL IMPORT
 
 export const Route = createFileRoute("/catalogue/")({
   validateSearch: (s: Record<string, unknown>): { categorie?: string | undefined } => ({
@@ -14,22 +15,19 @@ export const Route = createFileRoute("/catalogue/")({
     meta: [
       { title: "Catalogue — Éclat Events" },
       { name: "description", content: "Parcourez notre catalogue de matériel événementiel en location : mobilier, tentes, son & lumière." },
-      { property: "og:title", content: "Catalogue — Éclat Events" },
-      { property: "og:description", content: "Tout notre matériel événementiel en location." },
     ],
   }),
   component: Catalogue,
 });
 
 function Catalogue() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { categorie } = Route.useSearch();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Récupérer les catégories et les produits depuis Supabase
     const fetchData = async () => {
       const { data: catData } = await (supabase as any).from("categories").select("*");
       const { data: prodData } = await (supabase as any).from("products").select("*").order("created_at", { ascending: false });
@@ -51,10 +49,8 @@ function Catalogue() {
     );
   }
 
-  // Filtrer les produits si une catégorie est sélectionnée
   const list = categorie
     ? products.filter((p) => {
-        // On cherche la catégorie correspondante pour avoir son ID
         const cat = categories.find((c) => c.slug === categorie);
         return cat ? p.category_id === cat.id : false;
       })
@@ -68,9 +64,13 @@ function Catalogue() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <div className="flex flex-wrap gap-3 justify-center mb-12">
           <Link to="/catalogue" search={{}} className={`${pill} ${!categorie ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>{t("catalogue.all")}</Link>
-          {categories.map((c) => (
-            <Link key={c.slug} to="/catalogue" search={{ categorie: c.slug }} className={`${pill} ${categorie === c.slug ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>{c.name}</Link>
-          ))}
+          {categories.map((c) => {
+            // NOUVEAU : On traduit le nom de la catégorie
+            const catName = getLocalizedField(c, "name", i18n.language);
+            return (
+              <Link key={c.slug} to="/catalogue" search={{ categorie: c.slug }} className={`${pill} ${categorie === c.slug ? "bg-secondary text-secondary-foreground" : "hover:border-primary"}`}>{catName}</Link>
+            );
+          })}
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {list.map((p) => <ProductCard key={p.id} p={p} />)}

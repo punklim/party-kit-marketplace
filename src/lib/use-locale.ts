@@ -38,3 +38,12 @@ export function useRestoreLanguage() {
     }
   }, [i18n]);
 }
+/** 
+ * Récupère le bon texte selon la langue (ex: name_ar, name_en, ou name par défaut)
+ */
+export function getLocalizedField(item: any, field: string, lang: string) {
+  if (!item) return "";
+  if (lang === "ar" && item[`${field}_ar`]) return item[`${field}_ar`];
+  if (lang === "en" && item[`${field}_en`]) return item[`${field}_en`];
+  return item[field] || ""; // Retourne le français par défaut
+}

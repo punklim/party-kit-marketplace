@@ -4,19 +4,23 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { formatPrice } from "@/data/catalog";
 import { useQuote } from "@/lib/quote";
+import { getLocalizedField } from "@/lib/use-locale"; // NOUVEL IMPORT
 
 export function ProductCard({ p }: { p: any }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { add } = useQuote();
   const imageUrl = p.image_url || p.image || "https://placehold.co/600x600?text=Pas+d'image";
   const isOutOfStock = p.stock !== undefined && p.stock <= 0;
+  
+  // NOUVEAU : On récupère le nom traduit
+  const translatedName = getLocalizedField(p, "name", i18n.language);
 
   return (
     <div className="group bg-card border hover:shadow-elegant transition-shadow relative">
       <Link to="/produit/$slug" params={{ slug: p.slug }} className="block overflow-hidden aspect-square">
         <img
           src={imageUrl}
-          alt={p.name}
+          alt={translatedName}
           loading="lazy"
           width={1024}
           height={1024}
@@ -24,7 +28,6 @@ export function ProductCard({ p }: { p: any }) {
         />
       </Link>
 
-      {/* Badge Rupture de stock */}
       {isOutOfStock && (
         <div className="absolute top-3 end-3 bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded">
           {t("product.outOfStockBadge")}
@@ -32,8 +35,7 @@ export function ProductCard({ p }: { p: any }) {
       )}
 
       <div className="p-5">
-        {/* Même route que l'image : /produit/$slug */}
-        <Link to="/produit/$slug" params={{ slug: p.slug }} className="font-display text-2xl hover:text-primary">{p.name}</Link>
+        <Link to="/produit/$slug" params={{ slug: p.slug }} className="font-display text-2xl hover:text-primary">{translatedName}</Link>
         <div className="mt-3 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">{t("product.from")} <span className="text-foreground font-semibold">{formatPrice(p.price)}</span></p>
           <button
@@ -43,7 +45,7 @@ export function ProductCard({ p }: { p: any }) {
                 return;
               }
               add(p.slug);
-              toast.success(t("product.addedNamed", { name: p.name }));
+              toast.success(t("product.addedNamed", { name: translatedName }));
             }}
             disabled={isOutOfStock}
             aria-label={t("product.addToQuote")}

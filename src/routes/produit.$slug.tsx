@@ -12,7 +12,7 @@ import { Loader2, Calendar as CalendarIcon, Check, Copy, MessageCircle, X } from
 import { DayPicker, type DateRange } from "react-day-picker";
 import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "date-fns";
 import "react-day-picker/dist/style.css";
-
+import { getLocalizedField } from "@/lib/use-locale";
 export const Route = createFileRoute("/produit/$slug")({
   head: () => ({
     meta: [
@@ -288,8 +288,9 @@ function ProductPage() {
         />
         <div className="flex flex-col justify-center">
           <Link to="/catalogue" className="text-primary uppercase tracking-[0.3em] text-xs">{categoryName}</Link>
-          <h1 className="text-5xl md:text-6xl mt-3">{product.name}</h1>
-          <p className="mt-6 text-muted-foreground leading-relaxed">{product.description}</p>
+                    {/* NOUVEAU : Noms et descriptions traduits */}
+          <h1 className="text-5xl md:text-6xl mt-3">{getLocalizedField(product, "name", i18n.language)}</h1>
+          <p className="mt-6 text-muted-foreground leading-relaxed">{getLocalizedField(product, "description", i18n.language)}</p>
 
           <p className="mt-8 text-3xl font-display">
             {formatPrice(product.price)} <span className="text-base text-muted-foreground font-sans">{t("product.perDay")}</span>

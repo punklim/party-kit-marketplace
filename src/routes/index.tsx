@@ -7,7 +7,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
 import { categories, products } from "@/data/catalog";
 import { supabase } from "@/integrations/supabase/client";
-
+import { getLocalizedField } from "@/lib/use-locale";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
@@ -82,16 +82,21 @@ function Index() {
           <h2 className="text-5xl mt-3">{t("home.categories.title")}</h2>
         </div>
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((c) => (
-            <Link key={c.slug} to="/catalogue" search={{ categorie: c.slug }} className="group relative aspect-[3/4] overflow-hidden">
-              <img src={c.image} alt={c.name} loading="lazy" className="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
-              <div className="absolute inset-0 bg-hero-overlay" />
-              <div className="absolute bottom-0 p-6 text-secondary-foreground">
-                <h3 className="text-3xl">{c.name}</h3>
-                <p className="text-sm opacity-75 mt-1">{c.description}</p>
-              </div>
-            </Link>
-          ))}
+                    {categories.map((c) => {
+            // NOUVEAU : Traduction des catégories sur l'accueil
+            const catName = getLocalizedField(c, "name", i18n.language);
+            const catDesc = getLocalizedField(c, "description", i18n.language);
+            return (
+              <Link key={c.slug} to="/catalogue" search={{ categorie: c.slug }} className="group relative aspect-[3/4] overflow-hidden">
+                <img src={c.image} alt={catName} loading="lazy" className="absolute inset-0 h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="absolute inset-0 bg-hero-overlay" />
+                <div className="absolute bottom-0 p-6 text-secondary-foreground">
+                  <h3 className="text-3xl">{catName}</h3>
+                  <p className="text-sm opacity-75 mt-1">{catDesc}</p>
+                </div>
+              </Link>
+            );
+          })}
         </div>
       </section>
 
