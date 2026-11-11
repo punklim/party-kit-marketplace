@@ -6,6 +6,8 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
-    plugins: [nitro()], // On ajoute juste le plugin, sans preset
+    plugins: [
+      nitro({ preset: "vercel" }),
+    ],
   },
 });
