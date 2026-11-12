@@ -761,10 +761,25 @@ function ProductList() {
 }
 
 function ProductForm({ product, onClose, onSave }: { product: any, onClose: () => void, onSave: () => void }) {
-  const [form, setForm] = useState({ name: product?.name || "", slug: product?.slug || "", price: product?.price || 0, stock: product?.stock || 10, category_slug: product?.category_slug || "mobilier", description: product?.description || "", image_url: product?.image_url || "" });
+  const [form, setForm] = useState({
+    name: product?.name || "",
+    name_en: product?.name_en || "",
+    name_ar: product?.name_ar || "",
+    slug: product?.slug || "",
+    price: product?.price || 0,
+    stock: product?.stock || 10,
+    category_slug: product?.category_slug || "mobilier",
+    description: product?.description || "",
+    description_en: product?.description_en || "",
+    description_ar: product?.description_ar || "",
+    image_url: product?.image_url || "",
+    images_text: Array.isArray(product?.images) ? product.images.join("\n") : "",
+  });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
+
   const handleImageUpload = async (e: any) => {
     const file = e.target.files[0]; if (!file) return;
     setUploading(true);
@@ -775,25 +790,149 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
     setForm({ ...form, image_url: data.publicUrl });
     setUploading(false);
   };
+
   const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault(); setSaving(true);
+    e.preventDefault(); 
+    setSaving(true);
+    
     const { data: catData } = await (supabase as any).from("categories").select("id").eq("slug", form.category_slug).maybeSingle();
     if (!catData) { alert("Catégorie introuvable"); setSaving(false); return; }
-    const payload = { name: form.name, slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''), price: Number(form.price), stock: Number(form.stock), category_id: catData.id, description: form.description, image_url: form.image_url };
-    const { error } = product ? await (supabase as any).from("products").update(payload).eq("id", product.id) : await (supabase as any).from("products").insert(payload);
-    if (error) alert("Erreur : " + error.message); else onSave();
+    
+    const imagesArray = form.images_text
+      .split("\n")
+      .map((url: string) => url.trim())
+      .filter((url: string) => url !== "");
+
+    const payload = {
+      name: form.name,
+      name_en: form.name_en || null,
+      name_ar: form.name_ar || null,
+      slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+      price: Number(form.price),
+      stock: Number(form.stock),
+      category_id: catData.id,
+      description: form.description,
+      description_en: form.description_en || null,
+      description_ar: form.description_ar || null,
+      image_url: form.image_url,
+      images: imagesArray,
+    };
+
+    const { error } = product 
+      ? await (supabase as any).from("products").update(payload).eq("id", product.id) 
+      : await (supabase as any).from("products").insert(payload);
+      
+    if (error) alert("Erreur : " + error.message); 
+    else onSave();
+    
     setSaving(false);
   };
+
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-sm shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-        <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10"><h2 className="font-display text-2xl text-zinc-900">{product ? "Modifier" : "Ajouter"} un produit</h2><button onClick={onClose}><X className="h-5 w-5" /></button></div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4"><div className="sm:col-span-2"><label className="text-xs text-zinc-500">Nom</label><input required name="name" value={form.name} onChange={handleChange} className={field} /></div><div><label className="text-xs text-zinc-500">Prix (MAD)</label><input required type="number" name="price" value={form.price} onChange={handleChange} className={field} /></div></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4"><div><label className="text-xs text-zinc-500">Catégorie</label><select name="category_slug" value={form.category_slug} onChange={handleChange} className={field}><option value="mobilier">Mobilier</option><option value="tentes">Tentes</option><option value="son-lumiere">Son</option><option value="art-de-table">Art de la table</option></select></div><div><label className="text-xs text-zinc-500">Stock</label><input required type="number" name="stock" value={form.stock} onChange={handleChange} className={field} /></div></div>
-          <div><label className="text-xs text-zinc-500">Description</label><textarea required name="description" value={form.description} onChange={handleChange} rows={3} className={field} /></div>
-          <div><label className="text-xs text-zinc-500">Image</label><div className="flex items-center gap-4">{form.image_url && <img src={form.image_url} className="h-16 w-16 object-cover rounded border" />}<input type="file" onChange={handleImageUpload} className="text-sm" />{uploading && <Loader2 className="h-4 w-4 animate-spin" />}</div></div>
-          <div className="pt-4 border-t flex justify-end gap-3"><button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 rounded">Annuler</button><button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm font-medium rounded">{saving ? "Enregistrement..." : "Enregistrer"}</button></div>
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="p-6 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+          <h2 className="font-display text-2xl text-zinc-900">{product ? "Modifier" : "Ajouter"} un produit</h2>
+          <button onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          
+          {/* Ligne 1 : Nom et Prix */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="sm:col-span-2">
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (FR)</label>
+              <input required name="name" value={form.name} onChange={handleChange} className={field} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Prix (MAD)</label>
+              <input required type="number" name="price" value={form.price} onChange={handleChange} className={field} />
+            </div>
+          </div>
+
+          {/* Traductions des noms */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (EN)</label>
+              <input name="name_en" value={form.name_en} onChange={handleChange} className={field} placeholder="English name" />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (AR)</label>
+              <input name="name_ar" value={form.name_ar} onChange={handleChange} className={`${field} text-right`} dir="rtl" placeholder="الاسم بالعربية" />
+            </div>
+          </div>
+
+          {/* Catégorie et Stock */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Catégorie</label>
+              <select name="category_slug" value={form.category_slug} onChange={handleChange} className={field}>
+                <option value="mobilier">Mobilier</option>
+                <option value="tentes">Tentes</option>
+                <option value="son-lumiere">Son</option>
+                <option value="art-de-table">Art de la table</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Stock</label>
+              <input required type="number" name="stock" value={form.stock} onChange={handleChange} className={field} />
+            </div>
+          </div>
+
+          {/* Descriptions */}
+          <div className="space-y-4 border-t pt-4">
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase">Description (FR)</label>
+              <textarea required name="description" value={form.description} onChange={handleChange} rows={3} className={field} />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 uppercase">Description (EN)</label>
+                <textarea name="description_en" value={form.description_en} onChange={handleChange} rows={3} className={field} />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-zinc-500 uppercase">Description (AR)</label>
+                <textarea name="description_ar" value={form.description_ar} onChange={handleChange} rows={3} className={`${field} text-right`} dir="rtl" />
+              </div>
+            </div>
+          </div>
+
+          {/* Images */}
+          <div className="space-y-4 border-t pt-4">
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase block mb-2">Image principale (Couverture)</label>
+              <div className="flex items-center gap-4">
+                {form.image_url && <img src={form.image_url} className="h-20 w-20 object-cover rounded border" />}
+                <div className="flex-1">
+                  <input name="image_url" value={form.image_url} onChange={handleChange} className={`${field} mb-2`} placeholder="URL de l'image" />
+                  <input type="file" onChange={handleImageUpload} className="text-sm" />
+                  {uploading && <Loader2 className="h-4 w-4 animate-spin inline ml-2" />}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase block mb-2">
+                Galerie d'images supplémentaires (une URL par ligne)
+              </label>
+              <textarea 
+                name="images_text" 
+                value={form.images_text} 
+                onChange={handleChange} 
+                rows={4} 
+                className={`${field} font-mono text-xs`} 
+                placeholder="https://lien-image-1.jpg&#10;https://lien-image-2.jpg"
+              />
+              <p className="text-[10px] text-zinc-400 mt-1">Ces images apparaîtront sous forme de miniatures sur la fiche produit.</p>
+            </div>
+          </div>
+
+          <div className="pt-6 border-t flex justify-end gap-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 rounded">Annuler</button>
+            <button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm font-medium rounded disabled:opacity-50">
+              {saving ? "Enregistrement..." : "Enregistrer"}
+            </button>
+          </div>
         </form>
       </div>
     </div>
