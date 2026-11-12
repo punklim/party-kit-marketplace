@@ -4,6 +4,8 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { SiteLayout } from "@/components/SiteLayout";
 import { ProductCard } from "@/components/ProductCard";
+import { ProductGallery } from "@/components/ProductGallery";
+import { Breadcrumb } from "@/components/Breadcrumb";
 import { formatPrice } from "@/data/catalog";
 import { useQuote } from "@/lib/quote";
 import { useDateLocale, useTextDirection, getLocalizedField } from "@/lib/use-locale";
@@ -12,7 +14,6 @@ import { Loader2, Calendar as CalendarIcon, Check, Copy, MessageCircle, X } from
 import { DayPicker, type DateRange } from "react-day-picker";
 import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "date-fns";
 import "react-day-picker/dist/style.css";
-import { Breadcrumb } from "@/components/Breadcrumb";
 
 export const Route = createFileRoute("/produit/$slug")({
   head: () => ({
@@ -262,14 +263,17 @@ function ProductPage() {
     );
   }
 
-  const imageUrl = product.image_url || "https://placehold.co/600x600?text=Pas+d'image";
+  const defaultImage = product.image_url || "https://placehold.co/600x600?text=Pas+d'image";
+  const galleryImages: string[] = Array.isArray(product.images) && product.images.length > 0
+    ? product.images
+    : [defaultImage];
+  
   const isOutOfStock = product.stock <= 0;
   const translatedName = getLocalizedField(product, "name", i18n.language);
   const translatedDesc = getLocalizedField(product, "description", i18n.language);
 
   return (
     <SiteLayout>
-      {/* Fil d'Ariane */}
       <div className="mx-auto max-w-7xl px-6 pt-6">
         <Breadcrumb
           items={[
@@ -280,13 +284,12 @@ function ProductPage() {
       </div>
 
       <section className="mx-auto max-w-7xl px-6 py-8 grid gap-12 md:grid-cols-2">
-        <img
-          src={imageUrl}
-          alt={translatedName}
-          width={1024}
-          height={1024}
-          className={`w-full aspect-square object-cover ${isOutOfStock ? "opacity-50 grayscale" : ""}`}
+        <ProductGallery 
+          images={galleryImages} 
+          name={translatedName} 
+          isOutOfStock={isOutOfStock} 
         />
+        
         <div className="flex flex-col justify-center">
           <Link to="/catalogue" className="text-primary uppercase tracking-[0.3em] text-xs">{categoryName}</Link>
           <h1 className="text-5xl md:text-6xl mt-3">{translatedName}</h1>
@@ -347,6 +350,8 @@ function ProductPage() {
         </div>
       </section>
 
+      {/* ... (le reste du fichier reste identique : confirmation, calendrier, related) ... */}
+      
       {confirmation && (
         <section ref={confirmationRef} className="mx-auto max-w-7xl px-6 pb-16" aria-live="polite">
           <div className="border-2 border-primary bg-primary/5 rounded-sm p-8">
