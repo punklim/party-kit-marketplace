@@ -7,7 +7,7 @@ import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useRestoreLanguage } from "@/lib/use-locale";
 import { useReveal } from "@/lib/use-reveal";
-
+import { BackToTop } from "@/components/BackToTop";
 export function SiteLayout({ children }: { children: ReactNode }) {
   const { count } = useQuote();
   const { t, i18n } = useTranslation();
@@ -83,6 +83,7 @@ export function SiteLayout({ children }: { children: ReactNode }) {
             <Phone className="h-3 w-3" /> +212 6 91 05 55 97
           </a>
           <span className="hidden sm:block">{t("topbar.delivery")}</span>
+          <BackToTop /> {/* <--- AJOUTE CETTE LIGNE ICI */}
         </div>
       </div>
 
