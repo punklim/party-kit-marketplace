@@ -12,6 +12,7 @@ import { Loader2, Calendar as CalendarIcon, Check, Copy, MessageCircle, X } from
 import { DayPicker, type DateRange } from "react-day-picker";
 import { differenceInCalendarDays, eachDayOfInterval, format, parseISO } from "date-fns";
 import "react-day-picker/dist/style.css";
+import { Breadcrumb } from "@/components/Breadcrumb";
 
 export const Route = createFileRoute("/produit/$slug")({
   head: () => ({
@@ -42,7 +43,7 @@ const WHATSAPP_NUMBER = "212691055597";
 
 function ProductPage() {
   const { slug } = Route.useParams();
-  const { t, i18n } = useTranslation(); // ICI : on déclare t et i18n ensemble
+  const { t, i18n } = useTranslation();
   const dateLocale = useDateLocale();
   const dir = useTextDirection();
   const [product, setProduct] = useState<any>(null);
@@ -268,7 +269,17 @@ function ProductPage() {
 
   return (
     <SiteLayout>
-      <section className="mx-auto max-w-7xl px-6 py-16 grid gap-12 md:grid-cols-2">
+      {/* Fil d'Ariane */}
+      <div className="mx-auto max-w-7xl px-6 pt-6">
+        <Breadcrumb
+          items={[
+            { label: t("nav.catalogue"), to: "/catalogue" },
+            { label: translatedName },
+          ]}
+        />
+      </div>
+
+      <section className="mx-auto max-w-7xl px-6 py-8 grid gap-12 md:grid-cols-2">
         <img
           src={imageUrl}
           alt={translatedName}
