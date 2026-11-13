@@ -759,8 +759,8 @@ function ProductList() {
     </div>
   );
 }
-
 function ProductForm({ product, onClose, onSave }: { product: any, onClose: () => void, onSave: () => void }) {
+  const [categories, setCategories] = useState<any[]>([]);
   const [form, setForm] = useState({
     name: product?.name || "",
     name_en: product?.name_en || "",
@@ -768,7 +768,7 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
     slug: product?.slug || "",
     price: product?.price || 0,
     stock: product?.stock || 10,
-    category_slug: product?.category_slug || "mobilier",
+    category_id: product?.category_id || "",
     description: product?.description || "",
     description_en: product?.description_en || "",
     description_ar: product?.description_ar || "",
@@ -777,6 +777,13 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
   });
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  // Chargement des catégories depuis Supabase
+  useEffect(() => {
+    (supabase as any).from("categories").select("*").order("sort_order").then(({ data }: any) => {
+      setCategories(data || []);
+    });
+  }, []);
 
   const handleChange = (e: any) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -795,8 +802,11 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
     e.preventDefault(); 
     setSaving(true);
     
-    const { data: catData } = await (supabase as any).from("categories").select("id").eq("slug", form.category_slug).maybeSingle();
-    if (!catData) { alert("Catégorie introuvable"); setSaving(false); return; }
+    if (!form.category_id) {
+      alert("Veuillez choisir une catégorie.");
+      setSaving(false);
+      return;
+    }
     
     const imagesArray = form.images_text
       .split("\n")
@@ -810,7 +820,7 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
       slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
       price: Number(form.price),
       stock: Number(form.stock),
-      category_id: catData.id,
+      category_id: form.category_id,
       description: form.description,
       description_en: form.description_en || null,
       description_ar: form.description_ar || null,
@@ -838,7 +848,6 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
         
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           
-          {/* Ligne 1 : Nom et Prix */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="sm:col-span-2">
               <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (FR)</label>
@@ -850,27 +859,25 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
             </div>
           </div>
 
-          {/* Traductions des noms */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (EN)</label>
-              <input name="name_en" value={form.name_en} onChange={handleChange} className={field} placeholder="English name" />
+              <input name="name_en" value={form.name_en} onChange={handleChange} className={field} />
             </div>
             <div>
               <label className="text-xs font-semibold text-zinc-500 uppercase">Nom (AR)</label>
-              <input name="name_ar" value={form.name_ar} onChange={handleChange} className={`${field} text-right`} dir="rtl" placeholder="الاسم بالعربية" />
+              <input name="name_ar" value={form.name_ar} onChange={handleChange} className={`${field} text-right`} dir="rtl" />
             </div>
           </div>
 
-          {/* Catégorie et Stock */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-semibold text-zinc-500 uppercase">Catégorie</label>
-              <select name="category_slug" value={form.category_slug} onChange={handleChange} className={field}>
-                <option value="mobilier">Mobilier</option>
-                <option value="tentes">Tentes</option>
-                <option value="son-lumiere">Son</option>
-                <option value="art-de-table">Art de la table</option>
+              <select name="category_id" value={form.category_id} onChange={handleChange} className={field}>
+                <option value="">-- Choisir --</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
               </select>
             </div>
             <div>
@@ -879,7 +886,6 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
             </div>
           </div>
 
-          {/* Descriptions */}
           <div className="space-y-4 border-t pt-4">
             <div>
               <label className="text-xs font-semibold text-zinc-500 uppercase">Description (FR)</label>
@@ -897,7 +903,6 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
             </div>
           </div>
 
-          {/* Images */}
           <div className="space-y-4 border-t pt-4">
             <div>
               <label className="text-xs font-semibold text-zinc-500 uppercase block mb-2">Image principale (Couverture)</label>
@@ -921,9 +926,7 @@ function ProductForm({ product, onClose, onSave }: { product: any, onClose: () =
                 onChange={handleChange} 
                 rows={4} 
                 className={`${field} font-mono text-xs`} 
-                placeholder="https://lien-image-1.jpg&#10;https://lien-image-2.jpg"
               />
-              <p className="text-[10px] text-zinc-400 mt-1">Ces images apparaîtront sous forme de miniatures sur la fiche produit.</p>
             </div>
           </div>
 
@@ -979,25 +982,87 @@ function CategoryList() {
     </div>
   );
 }
-
 function CategoryForm({ category, onClose, onSave }: { category: any, onClose: () => void, onSave: () => void }) {
-  const [form, setForm] = useState({ name: category?.name || "", slug: category?.slug || "", description: category?.description || "", sort_order: category?.sort_order || 0 });
+  const [form, setForm] = useState({ 
+    name: category?.name || "", 
+    name_en: category?.name_en || "",
+    name_ar: category?.name_ar || "",
+    slug: category?.slug || "", 
+    description: category?.description || "", 
+    description_en: category?.description_en || "",
+    description_ar: category?.description_ar || "",
+    sort_order: category?.sort_order || 0 
+  });
   const [saving, setSaving] = useState(false);
+  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault(); setSaving(true);
-    const payload = { name: form.name, slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), description: form.description, sort_order: Number(form.sort_order) };
+    const payload = { 
+      name: form.name, 
+      name_en: form.name_en || null,
+      name_ar: form.name_ar || null,
+      slug: form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, '-'), 
+      description: form.description,
+      description_en: form.description_en || null,
+      description_ar: form.description_ar || null,
+      sort_order: Number(form.sort_order) 
+    };
     const { error } = category ? await (supabase as any).from("categories").update(payload).eq("id", category.id) : await (supabase as any).from("categories").insert(payload);
     if (error) alert(error.message); else onSave();
     setSaving(false);
   };
+  
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-sm shadow-xl w-full max-w-md" onClick={e => e.stopPropagation()}>
-        <div className="p-6 border-b flex justify-between"><h2 className="font-display text-xl">{category ? "Modifier" : "Nouvelle"} catégorie</h2><button onClick={onClose}><X className="h-5 w-5" /></button></div>
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="p-6 border-b flex justify-between">
+          <h2 className="font-display text-xl">{category ? "Modifier" : "Nouvelle"} catégorie</h2>
+          <button onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div><label className="text-xs text-zinc-500">Nom</label><input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={field} /></div>
-          <div><label className="text-xs text-zinc-500">Description</label><textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} className={field} /></div>
-          <div className="flex justify-end gap-3"><button type="button" onClick={onClose} className="px-4 py-2 text-sm">Annuler</button><button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm rounded">{saving ? "..." : "Enregistrer"}</button></div>
+          
+          {/* Noms multilingues */}
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <label className="text-xs text-zinc-500 uppercase">Nom (FR)</label>
+              <input required value={form.name} onChange={e => setForm({...form, name: e.target.value})} className={field} />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 uppercase">Nom (EN)</label>
+              <input value={form.name_en} onChange={e => setForm({...form, name_en: e.target.value})} className={field} />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 uppercase">Nom (AR)</label>
+              <input value={form.name_ar} onChange={e => setForm({...form, name_ar: e.target.value})} className={`${field} text-right`} dir="rtl" />
+            </div>
+          </div>
+
+          {/* Descriptions multilingues */}
+          <div>
+            <label className="text-xs text-zinc-500 uppercase">Description (FR)</label>
+            <textarea value={form.description} onChange={e => setForm({...form, description: e.target.value})} rows={2} className={field} />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-zinc-500 uppercase">Description (EN)</label>
+              <textarea value={form.description_en} onChange={e => setForm({...form, description_en: e.target.value})} rows={2} className={field} />
+            </div>
+            <div>
+              <label className="text-xs text-zinc-500 uppercase">Description (AR)</label>
+              <textarea value={form.description_ar} onChange={e => setForm({...form, description_ar: e.target.value})} rows={2} className={`${field} text-right`} dir="rtl" />
+            </div>
+          </div>
+
+          {/* Ordre d'affichage */}
+          <div>
+            <label className="text-xs text-zinc-500 uppercase">Ordre d'affichage</label>
+            <input type="number" value={form.sort_order} onChange={e => setForm({...form, sort_order: Number(e.target.value)})} className={field} />
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm">Annuler</button>
+            <button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm rounded">{saving ? "..." : "Enregistrer"}</button>
+          </div>
         </form>
       </div>
     </div>
