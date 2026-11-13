@@ -252,6 +252,25 @@ const resources = {
       "error.errorText": "Quelque chose s'est mal passé de notre côté. Veuillez réessayer ou revenir à l'accueil.",
       "error.retry": "Réessayer",
       "error.backHome": "Retour à l'accueil",
+
+      // Blog
+      "blog.title": "Notre Blog",
+      "blog.subtitle": "Conseils, inspirations et actualités",
+      "blog.readMore": "Lire la suite →",
+      "blog.empty": "Aucun article pour le moment. Revenez bientôt !",
+      "blog.notFound": "Article introuvable",
+      "blog.backToList": "Retour au blog",
+      "blog.seeAll": "Voir tous les articles",
+
+      // À propos
+      "about.title": "À propos",
+      "about.subtitle": "La passion du détail au service de vos plus beaux moments",
+      "about.knowHow": "Notre savoir-faire",
+      "about.description": "Depuis plus de dix ans, Éclat Events accompagne particuliers, agences et entreprises dans l'organisation de leurs événements. Notre parc de matériel est entretenu avec soin et nos équipes assurent livraison, montage et démontage.",
+      "about.stat1": "ans d'expérience",
+      "about.stat2": "événements",
+      "about.stat3": "articles en stock",
+      "about.stat4": "villes desservies",
     }
   },
   en: {
@@ -265,6 +284,7 @@ const resources = {
       "nav.devis": "Quote",
       "nav.whatsapp": "WhatsApp",
       "topbar.delivery": "Delivery & installation across Morocco",
+      "topbar.whatsappProduct": "Hello Éclat Events, I am interested in",
       "footer.rights": "All rights reserved.",
       "footer.contact": "Contact",
       "footer.legal": "Legal notice",
@@ -291,7 +311,6 @@ const resources = {
       "nav.myBookings": "My bookings",
       "nav.review": "Leave a review",
       "topbar.whatsappMessage": "Hello Éclat Events, I would like some information.",
-      "topbar.whatsappProduct": "Hello Éclat Events, I am interested in",
       "footer.about": "Premium event equipment rental in Morocco, run by a passionate team.",
       "footer.navigation": "Navigation",
       "footer.services": "Services",
@@ -486,6 +505,25 @@ const resources = {
       "error.errorText": "Something went wrong on our end. Please try again or go back home.",
       "error.retry": "Try again",
       "error.backHome": "Back to home",
+
+      // Blog
+      "blog.title": "Our Blog",
+      "blog.subtitle": "Tips, inspiration and news",
+      "blog.readMore": "Read more →",
+      "blog.empty": "No articles yet. Come back soon!",
+      "blog.notFound": "Article not found",
+      "blog.backToList": "Back to blog",
+      "blog.seeAll": "See all articles",
+
+      // About
+      "about.title": "About",
+      "about.subtitle": "Passion for detail serving your most beautiful moments",
+      "about.knowHow": "Our expertise",
+      "about.description": "For over ten years, Éclat Events has been helping individuals, agencies and businesses organise their events. Our equipment is carefully maintained and our teams handle delivery, installation and dismantling.",
+      "about.stat1": "years of experience",
+      "about.stat2": "events",
+      "about.stat3": "items in stock",
+      "about.stat4": "cities served",
     }
   },
   ar: {
@@ -736,6 +774,25 @@ const resources = {
       "error.errorText": "حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى أو العودة إلى الرئيسية.",
       "error.retry": "حاول مرة أخرى",
       "error.backHome": "العودة إلى الرئيسية",
+
+      // المدونة
+      "blog.title": "مدونتنا",
+      "blog.subtitle": "نصائح وإلهام وأخبار",
+      "blog.readMore": "اقرأ المزيد ←",
+      "blog.empty": "لا توجد مقالات حاليًا. عد قريبًا!",
+      "blog.notFound": "المقال غير موجود",
+      "blog.backToList": "العودة إلى المدونة",
+      "blog.seeAll": "عرض جميع المقالات",
+
+      // من نحن
+      "about.title": "من نحن",
+      "about.subtitle": "شغف بالتفاصيل في خدمة أجمل لحظاتكم",
+      "about.knowHow": "خبرتنا",
+      "about.description": "منذ أكثر من عشر سنوات، ترافق Éclat Events الأفراد والوكالات والشركات في تنظيم مناسباتهم. يتم صيانة معداتنا بعناية، ويتولى فريقنا التوصيل والتركيب والتفكيك.",
+      "about.stat1": "سنوات من الخبرة",
+      "about.stat2": "مناسبة",
+      "about.stat3": "قطعة في المخزون",
+      "about.stat4": "مدينة مغطاة",
     }
   }
 };

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { SiteLayout } from "@/components/SiteLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ArrowLeft } from "lucide-react";
@@ -10,6 +11,7 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function BlogPostPage() {
   const { slug } = Route.useParams();
+  const { t, i18n } = useTranslation();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -42,8 +44,8 @@ function BlogPostPage() {
     return (
       <SiteLayout>
         <div className="text-center py-20">
-          <h1 className="text-4xl mb-4">Article introuvable</h1>
-          <Link to="/blog" className="text-primary underline">Retour au blog</Link>
+          <h1 className="text-4xl mb-4">{t("blog.notFound")}</h1>
+          <Link to="/blog" className="text-primary underline">{t("blog.backToList")}</Link>
         </div>
       </SiteLayout>
     );
@@ -53,11 +55,11 @@ function BlogPostPage() {
     <SiteLayout>
       <article className="mx-auto max-w-3xl px-6 py-16">
         <Link to="/blog" className="text-sm text-primary hover:underline flex items-center gap-1 mb-6">
-          <ArrowLeft className="h-4 w-4" /> Retour au blog
+          <ArrowLeft className="h-4 w-4" /> {t("blog.backToList")}
         </Link>
         
         <p className="text-sm text-zinc-500 uppercase tracking-wider mb-4">
-          {new Date(post.created_at).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" })}
+          {new Date(post.created_at).toLocaleDateString(i18n.language, { day: "2-digit", month: "long", year: "numeric" })}
         </p>
         
         <h1 className="font-display text-4xl md:text-5xl text-zinc-900 mb-8 leading-tight">
@@ -76,7 +78,7 @@ function BlogPostPage() {
 
         <div className="mt-16 pt-8 border-t">
           <Link to="/blog" className="inline-flex items-center gap-2 text-primary font-medium hover:underline">
-            <ArrowLeft className="h-4 w-4" /> Voir tous les articles
+            <ArrowLeft className="h-4 w-4" /> {t("blog.seeAll")}
           </Link>
         </div>
       </article>
