@@ -520,68 +520,92 @@ function PlanningView() {
     const d = new Date(day.getFullYear(), day.getMonth(), day.getDate());
     return d >= start && d <= end;
   });
-  const conflicts = new Set();
+  
+  const conflicts = new Set<string>();
   days.forEach(day => {
     const dayBookings = getBookingsForDay(day);
     const productCount: Record<string, number> = {};
     dayBookings.forEach(b => { const pid = b.product_id; productCount[pid] = (productCount[pid] || 0) + 1; if (productCount[pid] > 1) conflicts.add(pid); });
   });
+  
   const today = new Date();
   const weekBookings = bookings.filter((b) => days.some((day) => getBookingsForDay(day).some((x) => x.id === b.id)));
   const weekProducts = new Set(weekBookings.map((b) => b.product_id)).size;
 
+  // On ajoute la fonction pour gérer le clic sur le conflit
+  const handleConflictClick = () => {
+    alert("Pour résoudre ce conflit, allez dans 'Réservations' et modifiez les dates de l'une des deux réservations.");
+  };
+
   return (
-    <div className="space-y-6 bg-[#0A0A0A] -m-6 md:-m-10 p-6 md:p-10 min-h-screen text-zinc-300">
-      <div className="flex justify-between items-center">
-        <div><p className="text-xs uppercase tracking-widest text-zinc-500 mb-1">Planning</p><h1 className="font-display text-3xl text-white">{startOfWeek.toLocaleDateString("fr-FR", { day: "numeric" })} — {days[6].toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</h1></div>
-        <div className="flex gap-2">
-          <button onClick={() => setWeekOffset(w => w - 1)} className="p-2 border border-zinc-700 rounded hover:bg-zinc-800"><ChevronLeft className="h-4 w-4" /></button>
-          <button onClick={() => setWeekOffset(w => w + 1)} className="p-2 border border-zinc-700 rounded hover:bg-zinc-800"><ChevronRight className="h-4 w-4" /></button>
-          <button className="px-4 py-2 bg-zinc-800 rounded text-sm">Semaine</button>
-          <button onClick={() => setShowNewBooking(true)} className="px-4 py-2 bg-[#D4AF37] text-black rounded text-sm font-medium flex items-center gap-2 hover:bg-[#c4a030]">
+    <div className="space-y-6">
+      <div className="flex flex-wrap justify-between items-center gap-4">
+        <div>
+          <p className="text-xs uppercase tracking-[0.16em] text-zinc-600 mb-1">Planning</p>
+          <h1 className="font-display text-3xl text-zinc-900">
+            {startOfWeek.toLocaleDateString("fr-FR", { day: "numeric" })} — {days[6].toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+          </h1>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => setWeekOffset(w => w - 1)} className="p-2.5 border border-[#d9d1bd] rounded-lg hover:bg-[#efe9da]"><ChevronLeft className="h-4 w-4 text-zinc-700" /></button>
+          <button onClick={() => setWeekOffset(w => w + 1)} className="p-2.5 border border-[#d9d1bd] rounded-lg hover:bg-[#efe9da]"><ChevronRight className="h-4 w-4 text-zinc-700" /></button>
+          <button onClick={() => setWeekOffset(0)} className="px-4 py-2 bg-white border border-[#d9d1bd] rounded-lg text-sm font-medium hover:bg-[#efe9da]">Aujourd'hui</button>
+          <button onClick={() => setShowNewBooking(true)} className="px-4 py-2 bg-[#D4AF37] text-black rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-[#c4a030]">
             <Plus className="h-4 w-4" /> Nouvelle réservation
           </button>
         </div>
       </div>
 
       {conflicts.size > 0 && (
-        <div className="bg-red-950/30 border border-red-900/50 p-4 rounded-sm flex items-center justify-between">
-          <div className="flex items-center gap-3"><AlertTriangle className="h-5 w-5 text-red-400" /><div><p className="text-sm font-medium text-white">{conflicts.size} conflit de stock cette semaine</p><p className="text-xs text-zinc-400">Un même matériel est réservé plusieurs fois le même jour.</p></div></div>
-          <button className="text-xs border border-red-700 text-red-300 px-3 py-1.5 rounded hover:bg-red-950">Proposer une alternative</button>
+        <div className="bg-[#fff7dc] border border-[#ecd9a0] p-4 rounded-xl flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertTriangle className="h-5 w-5 text-[#6e5400]" />
+            <div>
+              <p className="text-sm font-semibold text-zinc-900">{conflicts.size} conflit de stock cette semaine</p>
+              <p className="text-xs text-zinc-600">Un même matériel est réservé plusieurs fois le même jour.</p>
+            </div>
+          </div>
+          <button onClick={handleConflictClick} className="text-xs bg-zinc-900 text-white px-3 py-2 rounded-lg hover:bg-zinc-800">
+            Proposer une alternative
+          </button>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-white">{weekBookings.length}</p><p className="text-sm text-zinc-400">réservation(s) cette semaine</p></div>
-        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-[#D4AF37]">{weekProducts}</p><p className="text-sm text-zinc-400">produit(s) réservé(s) cette semaine</p></div>
-        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-red-400">{conflicts.size}</p><p className="text-sm text-zinc-400">conflit(s) à résoudre</p></div>
+        <div className="bg-white border border-[#ebe5d6] rounded-xl p-5"><p className="text-3xl font-display text-zinc-900">{weekBookings.length}</p><p className="text-sm text-zinc-600">réservation(s) cette semaine</p></div>
+        <div className="bg-white border border-[#ebe5d6] rounded-xl p-5"><p className="text-3xl font-display text-[#7a5f12]">{weekProducts}</p><p className="text-sm text-zinc-600">produit(s) réservé(s) cette semaine</p></div>
+        <div className="bg-white border border-[#ebe5d6] rounded-xl p-5"><p className="text-3xl font-display text-red-600">{conflicts.size}</p><p className="text-sm text-zinc-600">conflit(s) à résoudre</p></div>
       </div>
 
-      <div className="bg-[#141414] border border-zinc-800 rounded-sm overflow-hidden">
-        <div className="p-4 border-b border-zinc-800 flex justify-between items-center">
-          <h2 className="text-sm font-medium text-white">Réservations de la semaine</h2>
-          <div className="flex gap-3 text-xs"><span className="flex items-center gap-1"><span className="h-2 w-2 bg-green-500 rounded-full"></span> Confirmé</span><span className="flex items-center gap-1"><span className="h-2 w-2 bg-yellow-500 rounded-full"></span> Option</span><span className="flex items-center gap-1"><span className="h-2 w-2 bg-red-500 rounded-full"></span> Conflit</span></div>
+      <div className="bg-white border border-[#ebe5d6] rounded-xl overflow-hidden">
+        <div className="p-4 border-b border-[#ebe5d6] flex justify-between items-center">
+          <h2 className="text-sm font-semibold text-zinc-900">Réservations de la semaine</h2>
+          <div className="flex gap-3 text-xs">
+            <span className="flex items-center gap-1 text-zinc-600"><span className="h-2 w-2 bg-green-500 rounded-full"></span> Confirmé</span>
+            <span className="flex items-center gap-1 text-zinc-600"><span className="h-2 w-2 bg-yellow-500 rounded-full"></span> Option</span>
+            <span className="flex items-center gap-1 text-zinc-600"><span className="h-2 w-2 bg-red-500 rounded-full"></span> Conflit</span>
+          </div>
         </div>
-        <div className="grid grid-cols-8 border-b border-zinc-800">
-          <div className="p-3 bg-[#1a1a1a] border-r border-zinc-800"></div>
+        <div className="grid grid-cols-8 border-b border-[#ebe5d6]">
+          <div className="p-3 bg-[#faf8f2] border-r border-[#ebe5d6]"></div>
           {days.map((day, i) => (
-            <div key={i} className={`p-3 text-center border-r border-zinc-800 last:border-r-0 ${day.toDateString() === today.toDateString() ? "bg-zinc-800" : "bg-[#1a1a1a]"}`}>
+            <div key={i} className={`p-3 text-center border-r border-[#ebe5d6] last:border-r-0 ${day.toDateString() === today.toDateString() ? "bg-[#f0ead9]" : "bg-[#faf8f2]"}`}>
               <p className="text-xs text-zinc-500">{dayNames[i]}</p>
-              <p className={`text-lg font-display ${day.toDateString() === today.toDateString() ? "text-[#D4AF37] font-bold" : "text-white"}`}>{day.getDate()}</p>
+              <p className={`text-lg font-display ${day.toDateString() === today.toDateString() ? "text-[#7a5f12] font-bold" : "text-zinc-900"}`}>{day.getDate()}</p>
             </div>
           ))}
         </div>
         <div className="grid grid-cols-8 min-h-[400px]">
-          <div className="p-3 bg-[#1a1a1a] border-r border-zinc-800"></div>
+          <div className="p-3 bg-[#faf8f2] border-r border-[#ebe5d6]"></div>
           {days.map((day, i) => {
             const dayBookings = getBookingsForDay(day);
             return (
-              <div key={i} className="p-2 border-r border-zinc-800 last:border-r-0 space-y-2">
+              <div key={i} className="p-2 border-r border-[#ebe5d6] last:border-r-0 space-y-2">
                 {dayBookings.map(b => (
-                  <div key={b.id} className="bg-green-950/50 border-l-2 border-green-500 p-2 rounded-sm text-xs">
-                    <p className="font-semibold text-white">{b.products?.name}</p>
-                    <p className="text-zinc-400">{b.client_name}</p>
-                    <p className="text-zinc-500">Du {new Date(b.start_date).toLocaleDateString("fr-FR")} au {new Date(b.end_date).toLocaleDateString("fr-FR")}</p>
+                  <div key={b.id} className="bg-[#e8f5e9] border-l-2 border-green-600 p-2 rounded-sm text-xs">
+                    <p className="font-semibold text-zinc-900">{b.products?.name}</p>
+                    <p className="text-zinc-600">{b.client_name}</p>
+                    <p className="text-[10px] text-zinc-500">Du {new Date(b.start_date).toLocaleDateString("fr-FR")} au {new Date(b.end_date).toLocaleDateString("fr-FR")}</p>
                   </div>
                 ))}
               </div>
@@ -590,20 +614,20 @@ function PlanningView() {
         </div>
       </div>
 
-      <div className="bg-[#141414] border border-zinc-800 rounded-sm p-6">
-        <div className="flex justify-between items-center mb-4"><h2 className="font-display text-xl text-white">Disponibilité du matériel</h2><p className="text-xs text-zinc-500">Quantité réservée / stock total, par jour</p></div>
+      <div className="bg-white border border-[#ebe5d6] rounded-xl p-6">
+        <div className="flex justify-between items-center mb-4"><h2 className="font-display text-xl text-zinc-900">Disponibilité du matériel</h2><p className="text-xs text-zinc-500">Quantité réservée / stock total, par jour</p></div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead><tr className="border-b border-zinc-800"><th className="text-left p-2 text-zinc-400 font-medium">PRODUIT</th>{days.map((day, i) => <th key={i} className="text-center p-2 text-zinc-400 font-medium">{dayNames[i]} {day.getDate()}</th>)}</tr></thead>
+            <thead><tr className="border-b border-[#ebe5d6]"><th className="text-left p-2 text-zinc-500 font-medium">PRODUIT</th>{days.map((day, i) => <th key={i} className="text-center p-2 text-zinc-500 font-medium">{dayNames[i]} {day.getDate()}</th>)}</tr></thead>
             <tbody>
               {Array.from(new Set(bookings.map(b => b.product_id))).map(pid => {
                 const product = bookings.find(b => b.product_id === pid);
                 return (
-                  <tr key={pid} className="border-b border-zinc-800">
-                    <td className="p-2 text-zinc-300">{product?.products?.name || "-"}</td>
+                  <tr key={pid} className="border-b border-[#f0ead9]">
+                    <td className="p-2 text-zinc-900">{product?.products?.name || "-"}</td>
                     {days.map((day, i) => {
                       const isBooked = bookings.some(b => b.product_id === pid && day >= new Date(b.start_date) && day <= new Date(b.end_date));
-                      return <td key={i} className="p-2 text-center">{isBooked ? <span className="text-green-500">●</span> : <span className="text-zinc-700">-</span>}</td>;
+                      return <td key={i} className="p-2 text-center">{isBooked ? <span className="text-green-600">●</span> : <span className="text-zinc-300">-</span>}</td>;
                     })}
                   </tr>
                 );
@@ -628,7 +652,6 @@ function PlanningView() {
     </div>
   );
 }
-
 // ============================================================
 // MODAL NOUVELLE RÉSERVATION
 // ============================================================
