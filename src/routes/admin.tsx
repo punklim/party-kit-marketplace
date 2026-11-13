@@ -6,9 +6,8 @@ import {
   Loader2, LogOut, Mail, Phone, LayoutDashboard, FileText, MessageSquare, TrendingUp, 
   ArrowRight, Menu, X, Search, Trash2, Eye, 
   CheckCircle, Clock, Package, Plus, Edit, Image as ImageIcon,
-  Tag, Download, Image, Star, MailPlus, BookOpen, Calendar, AlertTriangle, ChevronLeft, ChevronRight
+  Tag, Download, Image, Star, MailPlus, BookOpen, Calendar, AlertTriangle, ChevronLeft, ChevronRight, Bell, ExternalLink
 } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import type { User } from "@supabase/supabase-js";
 
 export const Route = createFileRoute("/admin")({
@@ -29,9 +28,12 @@ function AdminPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState("");
-  const [activeTab, setActiveTab] = useState<"dashboard" | "planning" | "devis" | "messages" | "catalogue" | "categories" | "galerie" | "avis" | "newsletter" | "blog" | "reservations">("dashboard");
+  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [unreadMessages, setUnreadMessages] = useState(0);
+  const [newQuotes, setNewQuotes] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [devisSearch, setDevisSearch] = useState("");
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -48,6 +50,9 @@ function AdminPage() {
     if (user) {
       (supabase as any).from("contact_messages").select("id", { count: "exact", head: true }).eq("status", "nouveau").then(({ count }: any) => {
         setUnreadMessages(count || 0);
+      });
+      (supabase as any).from("quote_requests").select("id", { count: "exact", head: true }).eq("status", "nouveau").then(({ count }: any) => {
+        setNewQuotes(count || 0);
       });
     }
   }, [user, activeTab]);
@@ -84,222 +89,398 @@ function AdminPage() {
     );
   }
 
+  const badges: Partial<Record<Tab, number>> = { devis: newQuotes, messages: unreadMessages };
+
   return (
-    <div className="min-h-screen bg-[#FAF9F6] flex">
+    <div className="min-h-screen bg-[#f6f3ec] flex">
+      {/* Barre latérale (bureau) */}
       <aside className="hidden md:flex flex-col w-64 bg-[#111111] text-zinc-300 h-screen fixed left-0 top-0 z-40">
-        <div className="p-6 border-b border-zinc-800">
+        <div className="px-6 pt-6 pb-5 border-b border-zinc-800">
           <h1 className="font-display text-2xl text-white">Éclat<span className="text-[#D4AF37]">Events</span></h1>
-          <p className="text-xs text-zinc-500 mt-1 uppercase tracking-widest">Administration</p>
+          <p className="text-[11px] text-[#8b857a] mt-1 uppercase tracking-[0.2em]">Administration</p>
         </div>
-        <nav className="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
-          <SidebarItem icon={LayoutDashboard} label="Vue d'ensemble" active={activeTab === "dashboard"} onClick={() => setActiveTab("dashboard")} />
-          <SidebarItem icon={FileText} label="Demandes de devis" active={activeTab === "devis"} onClick={() => setActiveTab("devis")} />
-          <SidebarItem icon={Calendar} label="Planning" active={activeTab === "planning"} onClick={() => setActiveTab("planning")} />
-          <SidebarItem icon={MessageSquare} label="Messages" active={activeTab === "messages"} onClick={() => setActiveTab("messages")} badge={unreadMessages > 0 ? unreadMessages : undefined} />
-          <SidebarItem icon={Package} label="Catalogue" active={activeTab === "catalogue"} onClick={() => setActiveTab("catalogue")} />
-          <SidebarItem icon={Tag} label="Catégories" active={activeTab === "categories"} onClick={() => setActiveTab("categories")} />
-          <SidebarItem icon={Image} label="Galerie" active={activeTab === "galerie"} onClick={() => setActiveTab("galerie")} />
-          <SidebarItem icon={Star} label="Avis clients" active={activeTab === "avis"} onClick={() => setActiveTab("avis")} />
-          <SidebarItem icon={BookOpen} label="Blog" active={activeTab === "blog"} onClick={() => setActiveTab("blog")} />
-          <SidebarItem icon={Calendar} label="Réservations" active={activeTab === "reservations"} onClick={() => setActiveTab("reservations")} />
-          <SidebarItem icon={MailPlus} label="Newsletter" active={activeTab === "newsletter"} onClick={() => setActiveTab("newsletter")} />
-        </nav>
-        <div className="p-4 border-t border-zinc-800">
-          <div className="px-3 py-2 mb-2"><p className="text-xs text-zinc-500">Administrateur</p><p className="text-sm text-white truncate">{user.email}</p></div>
-          <button onClick={handleLogout} className="flex items-center gap-3 w-full px-3 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"><LogOut className="h-4 w-4" /> Déconnexion</button>
-        </div>
+        <AdminNav activeTab={activeTab} onSelect={setActiveTab} badges={badges} />
+        <SidebarUser email={user.email} onLogout={handleLogout} />
       </aside>
 
+      {/* Menu mobile */}
       {sidebarOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setSidebarOpen(false)}>
-          <aside className="w-64 bg-[#111111] text-zinc-300 h-full flex flex-col" onClick={e => e.stopPropagation()}>
-            <div className="p-6 border-b border-zinc-800 flex justify-between items-center"><h1 className="font-display text-2xl text-white">Éclat<span className="text-[#D4AF37]">Events</span></h1><button onClick={() => setSidebarOpen(false)}><X className="h-5 w-5" /></button></div>
-            <nav className="flex-1 py-6 space-y-1 px-3 overflow-y-auto">
-              <SidebarItem icon={LayoutDashboard} label="Vue d'ensemble" active={activeTab === "dashboard"} onClick={() => { setActiveTab("dashboard"); setSidebarOpen(false); }} />
-              <SidebarItem icon={FileText} label="Demandes de devis" active={activeTab === "devis"} onClick={() => { setActiveTab("devis"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Calendar} label="Planning" active={activeTab === "planning"} onClick={() => { setActiveTab("planning"); setSidebarOpen(false); }} />
-              <SidebarItem icon={MessageSquare} label="Messages" active={activeTab === "messages"} onClick={() => { setActiveTab("messages"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Package} label="Catalogue" active={activeTab === "catalogue"} onClick={() => { setActiveTab("catalogue"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Tag} label="Catégories" active={activeTab === "categories"} onClick={() => { setActiveTab("categories"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Image} label="Galerie" active={activeTab === "galerie"} onClick={() => { setActiveTab("galerie"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Star} label="Avis clients" active={activeTab === "avis"} onClick={() => { setActiveTab("avis"); setSidebarOpen(false); }} />
-              <SidebarItem icon={BookOpen} label="Blog" active={activeTab === "blog"} onClick={() => { setActiveTab("blog"); setSidebarOpen(false); }} />
-              <SidebarItem icon={Calendar} label="Réservations" active={activeTab === "reservations"} onClick={() => { setActiveTab("reservations"); setSidebarOpen(false); }} />
-              <SidebarItem icon={MailPlus} label="Newsletter" active={activeTab === "newsletter"} onClick={() => { setActiveTab("newsletter"); setSidebarOpen(false); }} />
-            </nav>
+          <aside className="w-72 max-w-[85vw] bg-[#111111] text-zinc-300 h-full flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-5 border-b border-zinc-800 flex justify-between items-center">
+              <h1 className="font-display text-2xl text-white">Éclat<span className="text-[#D4AF37]">Events</span></h1>
+              <button onClick={() => setSidebarOpen(false)} aria-label="Fermer le menu" className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-zinc-800"><X className="h-5 w-5" /></button>
+            </div>
+            <AdminNav activeTab={activeTab} onSelect={(t) => { setActiveTab(t); setSidebarOpen(false); }} badges={badges} />
+            <SidebarUser email={user.email} onLogout={handleLogout} />
           </aside>
         </div>
       )}
 
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-[#111111] text-white flex items-center justify-between px-4 z-40">
         <h1 className="font-display text-xl">Éclat<span className="text-[#D4AF37]">Events</span></h1>
-        <button onClick={() => setSidebarOpen(true)}><Menu /></button>
+        <button onClick={() => setSidebarOpen(true)} aria-label="Ouvrir le menu" className="h-11 w-11 flex items-center justify-center rounded-lg hover:bg-zinc-800"><Menu /></button>
       </div>
 
-      <main className="flex-1 md:ml-64 p-6 md:p-10 pt-20 md:pt-10 w-full overflow-x-hidden">
-        {activeTab === "dashboard" && <MaisonView setActiveTab={setActiveTab} />}
-        {activeTab === "planning" && <PlanningView />}
-        {activeTab === "catalogue" && <ProductList />}
-        {activeTab === "categories" && <CategoryList />}
-        {activeTab === "galerie" && <GalleryList />}
-        {activeTab === "avis" && <TestimonialsList />}
-        {activeTab === "blog" && <BlogList />}
-        {activeTab === "reservations" && <BookingsList />}
-        {activeTab === "devis" && <DevisList />}
-        {activeTab === "messages" && <MessagesList />}
-        {activeTab === "newsletter" && <NewsletterList />}
+      <main className="flex-1 md:ml-64 w-full min-w-0 overflow-x-hidden">
+        {/* Barre du haut (bureau) */}
+        <header className="hidden md:flex sticky top-0 z-30 h-[76px] items-center justify-between gap-4 px-10 bg-[#f6f3ec]/95 backdrop-blur">
+          <form
+            role="search"
+            onSubmit={(e) => { e.preventDefault(); setDevisSearch(searchTerm.trim()); setActiveTab("devis"); }}
+            className="relative w-full max-w-md"
+          >
+            <label htmlFor="admin-search" className="sr-only">Rechercher un devis</label>
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" aria-hidden="true" />
+            <input
+              id="admin-search"
+              type="search"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Rechercher un devis (nom, email, ville)…"
+              className="w-full h-11 pl-10 pr-4 text-sm border border-[#e4ddcc] rounded-lg bg-white focus:outline-none focus:border-[#D4AF37] transition-colors"
+            />
+          </form>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveTab(unreadMessages > 0 ? "messages" : "devis")}
+              aria-label={`Notifications${unreadMessages + newQuotes > 0 ? ` (${unreadMessages + newQuotes} à traiter)` : ""}`}
+              className="relative h-11 w-11 flex items-center justify-center rounded-lg hover:bg-[#efe9da] transition-colors"
+            >
+              <Bell className="h-5 w-5" />
+              {unreadMessages + newQuotes > 0 && <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 rounded-full bg-red-600 border-2 border-[#f6f3ec]" />}
+            </button>
+            <a
+              href="/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 h-11 px-4 text-sm font-medium bg-white border border-[#d9d1bd] rounded-lg transition-all duration-200 hover:-translate-y-px hover:shadow-md"
+            >
+              Voir le site <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          </div>
+        </header>
+
+        <div className="p-6 md:p-10 md:pt-6 pt-20">
+          {activeTab === "dashboard" && <MaisonView setActiveTab={setActiveTab} />}
+          {activeTab === "planning" && <PlanningView />}
+          {activeTab === "catalogue" && <ProductList />}
+          {activeTab === "categories" && <CategoryList />}
+          {activeTab === "galerie" && <GalleryList />}
+          {activeTab === "avis" && <TestimonialsList />}
+          {activeTab === "blog" && <BlogList />}
+          {activeTab === "reservations" && <BookingsList />}
+          {activeTab === "devis" && <DevisList key={devisSearch} initialSearch={devisSearch} />}
+          {activeTab === "messages" && <MessagesList />}
+          {activeTab === "newsletter" && <NewsletterList />}
+        </div>
       </main>
     </div>
   );
 }
 
-function SidebarItem({ icon: Icon, label, active, onClick, badge }: { icon: any, label: string, active: boolean, onClick: () => void, badge?: number }) {
+// ============================================================
+// NAVIGATION (groupée, une seule définition pour bureau et mobile)
+// ============================================================
+type Tab = "dashboard" | "planning" | "devis" | "messages" | "catalogue" | "categories" | "galerie" | "avis" | "newsletter" | "blog" | "reservations";
+
+const NAV_GROUPS: { title: string; items: { tab: Tab; label: string; icon: any }[] }[] = [
+  {
+    title: "Activité",
+    items: [
+      { tab: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
+      { tab: "devis", label: "Demandes de devis", icon: FileText },
+      { tab: "planning", label: "Planning", icon: Calendar },
+      { tab: "reservations", label: "Réservations", icon: CheckCircle },
+      { tab: "messages", label: "Messages", icon: MessageSquare },
+    ],
+  },
+  {
+    title: "Contenu",
+    items: [
+      { tab: "catalogue", label: "Catalogue", icon: Package },
+      { tab: "categories", label: "Catégories", icon: Tag },
+      { tab: "galerie", label: "Galerie", icon: Image },
+      { tab: "avis", label: "Avis clients", icon: Star },
+      { tab: "blog", label: "Blog", icon: BookOpen },
+    ],
+  },
+  {
+    title: "Marketing",
+    items: [{ tab: "newsletter", label: "Newsletter", icon: MailPlus }],
+  },
+];
+
+function AdminNav({ activeTab, onSelect, badges }: { activeTab: Tab; onSelect: (t: Tab) => void; badges: Partial<Record<Tab, number>> }) {
   return (
-    <button onClick={onClick} className={`w-full flex items-center justify-between px-3 py-3 text-sm rounded transition-colors ${active ? "bg-[#222] text-white font-medium border-l-2 border-[#D4AF37]" : "text-zinc-400 hover:bg-[#222] hover:text-white"}`}>
-      <div className="flex items-center gap-3"><Icon className="h-4 w-4" />{label}</div>
-      {badge !== undefined && <span className="bg-[#D4AF37] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{badge}</span>}
+    <nav className="flex-1 py-3 px-3 overflow-y-auto" aria-label="Navigation de l'administration">
+      {NAV_GROUPS.map((group) => (
+        <div key={group.title} className="mb-3">
+          <p className="px-3 pt-3 pb-2 text-[11px] uppercase tracking-[0.16em] text-[#8b857a]">{group.title}</p>
+          <div className="space-y-0.5">
+            {group.items.map((item) => (
+              <SidebarItem
+                key={item.tab}
+                icon={item.icon}
+                label={item.label}
+                active={activeTab === item.tab}
+                onClick={() => onSelect(item.tab)}
+                badge={badges[item.tab]}
+              />
+            ))}
+          </div>
+        </div>
+      ))}
+    </nav>
+  );
+}
+
+function SidebarItem({ icon: Icon, label, active, onClick, badge }: { icon: any; label: string; active: boolean; onClick: () => void; badge?: number }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-current={active ? "page" : undefined}
+      className={`w-full min-h-[44px] flex items-center justify-between px-3 text-sm rounded-lg transition-colors ${
+        active ? "bg-[#1f1c14] text-white font-medium shadow-[inset_3px_0_0_#D4AF37]" : "text-[#a8a29a] hover:bg-[#1c1c1c] hover:text-white"
+      }`}
+    >
+      <span className="flex items-center gap-3"><Icon className="h-[18px] w-[18px] shrink-0" />{label}</span>
+      {badge !== undefined && badge > 0 && <span className="bg-[#D4AF37] text-black text-[11px] font-semibold px-2 py-0.5 rounded-full">{badge}</span>}
     </button>
   );
 }
 
+function SidebarUser({ email, onLogout }: { email?: string | null; onLogout: () => void }) {
+  return (
+    <div className="p-4 border-t border-zinc-800 flex items-center gap-3">
+      <div className="h-10 w-10 shrink-0 rounded-full bg-[#D4AF37] text-black font-semibold flex items-center justify-center uppercase">{(email || "A").charAt(0)}</div>
+      <div className="min-w-0 flex-1">
+        <p className="text-xs text-[#8b857a]">Administrateur</p>
+        <p className="text-sm text-white truncate">{email}</p>
+      </div>
+      <button onClick={onLogout} aria-label="Déconnexion" className="h-11 w-11 shrink-0 flex items-center justify-center rounded-lg text-[#a8a29a] hover:text-white hover:bg-zinc-800 transition-colors">
+        <LogOut className="h-[18px] w-[18px]" />
+      </button>
+    </div>
+  );
+}
+
 // ============================================================
-// VUE MAISON
+// VUE D'ENSEMBLE (tous les chiffres sont calculés depuis quote_requests)
 // ============================================================
-function MaisonView({ setActiveTab }: { setActiveTab: (tab: any) => void }) {
-  const [stats, setStats] = useState({
-    devis: 0, messages: 0, total: 0, nouveaux: 0, acceptes: 0,
-    enAttente: 0, sansReponse24h: 0, prochainsEvenements: [] as any[],
-    entonnoir: { nouveau: 0, en_cours: 0, devis_envoye: 0, accepte: 0 },
-  });
-  const [recentDevis, setRecentDevis] = useState<any[]>([]);
-  const [chartData, setChartData] = useState<any[]>([]);
+const MONTHS = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
+const MONTHS_LONG = ["janv.", "févr.", "mars", "avr.", "mai", "juin", "juil.", "août", "sept.", "oct.", "nov.", "déc."];
+
+function MaisonView({ setActiveTab }: { setActiveTab: (tab: Tab) => void }) {
+  const [devis, setDevis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    const fetchStats = async () => {
-      const { data: devisData } = await (supabase as any).from("quote_requests").select("*").order("created_at", { ascending: false });
-      const { data: msgData } = await (supabase as any).from("contact_messages").select("*");
-      const devis = devisData || [];
-      const messages = msgData || [];
-      const total = devis.reduce((sum: number, d: any) => sum + Number(d.estimated_total || 0), 0);
-      const acceptes = devis.filter((d: any) => d.status === "accepte");
-      const enAttente = devis.filter((d: any) => d.status !== "accepte" && d.status !== "refuse");
-      const sansReponse24h = enAttente.filter((d: any) => Date.now() - new Date(d.created_at).getTime() > 24 * 60 * 60 * 1000);
-      const entonnoir = {
-        nouveau: devis.filter((d: any) => d.status === "nouveau").length,
-        en_cours: devis.filter((d: any) => d.status === "en_cours").length,
-        devis_envoye: devis.filter((d: any) => d.status === "devis_envoye").length,
-        accepte: acceptes.length,
-      };
-      const prochains = devis.filter((d: any) => d.event_date && new Date(d.event_date) >= new Date()).sort((a: any, b: any) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime()).slice(0, 5);
-      setStats({
-        devis: devis.length, messages: messages.length, total,
-        nouveaux: entonnoir.nouveau, acceptes: acceptes.length, enAttente: enAttente.length,
-        sansReponse24h: sansReponse24h.length, prochainsEvenements: prochains, entonnoir,
-      });
-      setRecentDevis(devis.slice(0, 5));
-      const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Juin", "Juil", "Août", "Sep", "Oct", "Nov", "Déc"];
-      const last6Months: any[] = [];
-      for (let i = 5; i >= 0; i--) { const d = new Date(); d.setMonth(d.getMonth() - i); last6Months.push({ month: months[d.getMonth()], count: 0 }); }
-      devis.forEach((d: any) => { const date = new Date(d.created_at); const monthLabel = months[date.getMonth()]; const monthData = last6Months.find(m => m.month === monthLabel); if (monthData) monthData.count++; });
-      setChartData(last6Months);
-      setLoading(false);
-    };
-    fetchStats();
+    (supabase as any)
+      .from("quote_requests")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .then(
+        ({ data }: any) => { setDevis(data || []); setLoading(false); },
+        () => setLoading(false)
+      );
   }, []);
+
+  // Déclenche l'animation des barres une fois les données affichées
+  useEffect(() => {
+    if (loading) return;
+    const id = requestAnimationFrame(() => setReady(true));
+    return () => cancelAnimationFrame(id);
+  }, [loading]);
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const amount = (d: any) => Number(d.estimated_total || 0);
+  const inMonth = (iso: string, monthsAgo: number) => {
+    const d = new Date(iso);
+    const ref = new Date(now.getFullYear(), now.getMonth() - monthsAgo, 1);
+    return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth();
+  };
+
+  const thisMonth = devis.filter((d) => inMonth(d.created_at, 0)).length;
+  const lastMonth = devis.filter((d) => inMonth(d.created_at, 1)).length;
+  const monthHint =
+    lastMonth === 0
+      ? "Aucune demande le mois précédent"
+      : `${thisMonth >= lastMonth ? "+" : "−"}${Math.abs(Math.round(((thisMonth - lastMonth) / lastMonth) * 100))} % par rapport au mois dernier`;
+
+  const accepted = devis.filter((d) => d.status === "accepte");
+  const sent = devis.filter((d) => d.status === "devis_envoye");
+  const pending = devis.filter((d) => d.status !== "accepte" && d.status !== "refuse");
+  const late = pending.filter((d) => Date.now() - new Date(d.created_at).getTime() > 24 * 60 * 60 * 1000);
+  const revenueConfirmed = accepted.reduce((s, d) => s + amount(d), 0);
+  const revenuePending = sent.reduce((s, d) => s + amount(d), 0);
+  const conversion = devis.length ? Math.round((accepted.length / devis.length) * 100) : 0;
+
+  const funnel = [
+    { label: "Demandes reçues", value: devis.length },
+    { label: "Contactées", value: devis.filter((d) => ["en_cours", "devis_envoye", "accepte"].includes(d.status)).length },
+    { label: "Devis envoyés", value: devis.filter((d) => ["devis_envoye", "accepte"].includes(d.status)).length },
+    { label: "Acceptées", value: accepted.length },
+  ];
+
+  const monthly = Array.from({ length: 6 }, (_, i) => {
+    const ref = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    const count = devis.filter((d) => {
+      const x = new Date(d.created_at);
+      return x.getFullYear() === ref.getFullYear() && x.getMonth() === ref.getMonth();
+    }).length;
+    return { label: MONTHS[ref.getMonth()], count, current: i === 5 };
+  });
+  const maxCount = Math.max(1, ...monthly.map((m) => m.count));
+
+  const upcoming = devis
+    .filter((d) => d.event_date && d.status !== "refuse" && new Date(d.event_date + "T00:00:00") >= startOfToday)
+    .sort((a, b) => new Date(a.event_date).getTime() - new Date(b.event_date).getTime())
+    .slice(0, 5);
+
+  const todayLabel = now.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const card = "bg-white border border-[#ebe5d6] rounded-[14px]";
+  const enter = "animate-in fade-in slide-in-from-bottom-3 duration-500 fill-mode-both";
+
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-start">
+    <div className="space-y-6">
+      <div className={`flex flex-wrap items-end justify-between gap-4 ${enter}`}>
         <div>
-          <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">Samedi 7 novembre 2026</p>
-          <h1 className="font-display text-4xl text-zinc-900">Vue d'ensemble</h1>
+          <p className="text-xs uppercase tracking-[0.16em] text-zinc-600">{todayLabel}</p>
+          <h1 className="font-display text-4xl md:text-5xl text-zinc-900 mt-1.5 leading-[1.05]">Bonjour, voici votre journée</h1>
         </div>
-        <button onClick={() => setActiveTab("devis")} className="bg-[#D4AF37] text-black px-4 py-2 rounded-sm text-sm font-medium flex items-center gap-2 hover:bg-[#c4a030]"><Plus className="h-4 w-4" /> Nouveau devis</button>
+        <div className="flex flex-wrap gap-2.5">
+          <button onClick={() => setActiveTab("planning")} className="inline-flex items-center gap-2 min-h-[44px] px-4 text-sm font-medium bg-white border border-[#d9d1bd] rounded-lg transition-all duration-200 hover:-translate-y-px hover:shadow-md">
+            Nouvelle réservation
+          </button>
+          <button onClick={() => setActiveTab("devis")} className="inline-flex items-center gap-2 min-h-[44px] px-4 text-sm font-semibold bg-[#D4AF37] text-zinc-900 rounded-lg transition-all duration-200 hover:-translate-y-px hover:shadow-md">
+            <Plus className="h-4 w-4" /> Nouveau devis
+          </button>
+        </div>
       </div>
 
-      {stats.sansReponse24h > 0 && (
-        <div className="bg-[#FDF8E4] border border-[#F0E2B6] p-4 rounded-sm flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Clock className="h-5 w-5 text-[#D4AF37]" />
+      {late.length > 0 && (
+        <div className={`flex flex-wrap items-center justify-between gap-4 bg-[#fff7dc] border border-[#ecd9a0] rounded-xl px-5 py-4 ${enter}`}>
+          <div className="flex items-center gap-3.5">
+            <div className="h-10 w-10 shrink-0 rounded-full bg-[#f3e2a8] flex items-center justify-center"><Clock className="h-5 w-5 text-[#6e5400]" /></div>
             <div>
-              <p className="text-sm font-medium text-zinc-900"><strong>{stats.sansReponse24h} demandes attendent une réponse depuis plus de 24 h</strong></p>
-              <p className="text-xs text-zinc-500">Le site promet un devis sous 24 h.</p>
+              <p className="font-semibold text-[15px] text-zinc-900">
+                {late.length} {late.length > 1 ? "demandes attendent" : "demande attend"} une réponse depuis plus de 24 h
+              </p>
+              <p className="text-[13px] text-zinc-600 mt-0.5">Le site promet un devis sous 24 h.</p>
             </div>
           </div>
-          <button onClick={() => setActiveTab("devis")} className="text-xs bg-zinc-900 text-white px-3 py-1.5 rounded hover:bg-zinc-800">Traiter maintenant</button>
+          <button onClick={() => setActiveTab("devis")} className="inline-flex items-center min-h-[44px] px-5 text-[13px] font-medium bg-zinc-900 text-white rounded-lg hover:bg-zinc-800 transition-colors">
+            Traiter maintenant
+          </button>
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white p-6 border rounded-sm shadow-sm"><p className="text-sm text-zinc-500 mb-1">Demandes ce mois</p><p className="text-4xl font-display text-zinc-900">{stats.devis}</p><p className="text-xs text-green-600 mt-1">+18 % vs octobre</p></div>
-        <div className="bg-white p-6 border rounded-sm shadow-sm"><p className="text-sm text-zinc-500 mb-1">CA confirmé</p><p className="text-4xl font-display text-zinc-900">{formatPrice(stats.total - stats.enAttente * 1000)}</p><p className="text-xs text-green-600 mt-1">+12 % 7 devis acceptés</p></div>
-        <div className="bg-white p-6 border rounded-sm shadow-sm"><p className="text-sm text-zinc-500 mb-1">CA en attente</p><p className="text-4xl font-display text-zinc-900">{formatPrice(stats.enAttente * 1000)}</p><p className="text-xs text-zinc-500 mt-1">5 devis envoyés, sans réponse</p></div>
-        <div className="bg-white p-6 border rounded-sm shadow-sm"><p className="text-sm text-zinc-500 mb-1">Taux de conversion</p><p className="text-4xl font-display text-zinc-900">{stats.devis ? Math.round((stats.acceptes / stats.devis) * 100) : 0} %</p><p className="text-xs text-green-600 mt-1">+4 pts demande → accepté</p></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {[
+          { label: "Demandes ce mois", value: String(thisMonth), unit: "", hint: monthHint },
+          { label: "Chiffre d'affaires confirmé", value: formatPrice(revenueConfirmed), unit: "", hint: `${accepted.length} devis accepté${accepted.length > 1 ? "s" : ""}` },
+          { label: "Chiffre d'affaires en attente", value: formatPrice(revenuePending), unit: "", hint: `${sent.length} devis envoyé${sent.length > 1 ? "s" : ""}, sans réponse` },
+          { label: "Taux de conversion", value: `${conversion} %`, unit: "", hint: "Demandes acceptées / demandes reçues" },
+        ].map((k, i) => (
+          <div key={k.label} style={{ animationDelay: `${i * 70}ms` }} className={`${card} p-5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg ${enter}`}>
+            <p className="text-[13px] text-zinc-600">{k.label}</p>
+            <p className="font-display text-4xl font-semibold text-zinc-900 mt-2 leading-tight">{k.value}</p>
+            <p className="text-xs text-zinc-600 mt-1">{k.hint}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border rounded-sm shadow-sm p-6">
-          <h2 className="font-display text-xl text-zinc-900 mb-6">Chiffre d'affaires</h2>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#71717a' }} />
-                <Tooltip cursor={{ fill: '#f4f4f5' }} />
-                <Bar dataKey="count" fill="#D4AF37" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-4">
+        <section className={`${card} p-6 ${enter}`}>
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-2xl font-semibold text-zinc-900">Demandes par mois</h2>
+            <span className="text-xs text-zinc-600">6 derniers mois</span>
           </div>
-        </div>
-        <div className="bg-white border rounded-sm shadow-sm p-6">
-          <h2 className="font-display text-xl text-zinc-900 mb-6">Entonnoir des devis</h2>
-          <p className="text-xs text-zinc-500 mb-4">Novembre — de la demande à l'acceptation</p>
-          <div className="space-y-4">
-            {[
-              { label: "Demandes reçues", value: stats.devis },
-              { label: "Contactées", value: stats.entonnoir.en_cours + stats.entonnoir.devis_envoye + stats.entonnoir.accepte },
-              { label: "Devis envoyés", value: stats.entonnoir.devis_envoye + stats.entonnoir.accepte },
-              { label: "Acceptées", value: stats.entonnoir.accepte },
-            ].map((step) => (
+          <div className="mt-5 h-56 flex items-end gap-4 border-b border-[#ebe5d6] px-2">
+            {monthly.map((m) => (
+              <div key={m.label} className="flex-1 h-full flex flex-col justify-end items-center">
+                {m.count > 0 && <span className="text-xs font-semibold mb-1.5">{m.count}</span>}
+                <div
+                  className={`w-full rounded-t-lg transition-[height] duration-700 ease-out motion-reduce:transition-none ${m.count > 0 ? "bg-gradient-to-b from-[#D4AF37] to-[#a8842c]" : "bg-[#ece5d2] rounded-sm"}`}
+                  style={{ height: ready && m.count > 0 ? `${(m.count / maxCount) * 80}%` : "3px" }}
+                />
+              </div>
+            ))}
+          </div>
+          <div className="flex gap-4 px-2 pt-2 text-xs text-zinc-600">
+            {monthly.map((m) => (
+              <span key={m.label} className={`flex-1 text-center ${m.current ? "text-zinc-900 font-semibold" : ""}`}>{m.label}</span>
+            ))}
+          </div>
+        </section>
+
+        <section className={`${card} p-6 ${enter}`}>
+          <h2 className="font-display text-2xl font-semibold text-zinc-900">Entonnoir des devis</h2>
+          <p className="text-[13px] text-zinc-600 mt-1.5 mb-5">De la demande à l'acceptation</p>
+          <div className="grid gap-[18px]">
+            {funnel.map((step) => (
               <div key={step.label}>
-                <div className="flex justify-between text-sm mb-1"><span className="text-zinc-600">{step.label}</span><span className="font-semibold text-zinc-900">{step.value}</span></div>
-                <div className="h-2 bg-zinc-100 rounded-full overflow-hidden"><div className="h-full bg-[#D4AF37]" style={{ width: `${stats.devis ? (step.value / stats.devis) * 100 : 0}%` }} /></div>
+                <div className="flex justify-between text-sm mb-1.5"><span>{step.label}</span><strong>{step.value}</strong></div>
+                <div className="h-2.5 bg-[#f0ead9] rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#D4AF37] rounded-full transition-[width] duration-700 ease-out motion-reduce:transition-none"
+                    style={{ width: ready && devis.length ? `${(step.value / devis.length) * 100}%` : "0%" }}
+                  />
+                </div>
               </div>
             ))}
           </div>
-        </div>
+        </section>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white border rounded-sm shadow-sm p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="font-display text-xl text-zinc-900">Dernières demandes</h2>
-            <button onClick={() => setActiveTab("devis")} className="text-sm text-[#D4AF37] hover:underline flex items-center gap-1">Voir tout <ArrowRight className="h-3 w-3" /></button>
+      <div className="grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-4">
+        <section className={`${card} px-6 pt-6 pb-3 ${enter}`}>
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-display text-2xl font-semibold text-zinc-900">Dernières demandes</h2>
+            <button onClick={() => setActiveTab("devis")} className="min-h-[44px] inline-flex items-center gap-1 text-[13px] font-semibold text-[#7a5f12] hover:underline">Voir tout <ArrowRight className="h-3.5 w-3.5" /></button>
           </div>
-          <div className="space-y-4">
-            {recentDevis.map((d) => (
-              <div key={d.id} className="flex justify-between items-center pb-4 border-b last:border-0 last:pb-0">
-                <div><p className="font-medium text-sm text-zinc-900">{d.full_name}</p><p className="text-xs text-zinc-500">{d.event_type} · {d.city}</p></div>
-                <div className="text-right"><p className="font-semibold text-sm text-zinc-900">{formatPrice(d.estimated_total)}</p><StatusBadge status={d.status} /></div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="bg-white border rounded-sm shadow-sm p-6">
-          <h2 className="font-display text-xl text-zinc-900 mb-6">Prochains événements</h2>
-          <div className="space-y-3">
-            {stats.prochainsEvenements.map((d: any) => (
-              <div key={d.id} className="flex items-center gap-3 pb-3 border-b last:border-0">
-                <div className="h-10 w-10 bg-[#FDF8E4] rounded-full flex items-center justify-center"><span className="text-xs font-bold text-[#D4AF37]">{new Date(d.event_date).getDate()}</span></div>
-                <div className="flex-1"><p className="text-sm font-medium text-zinc-900">{d.full_name}</p><p className="text-xs text-zinc-500">{d.event_type} · {d.city}</p></div>
+          {devis.length === 0 && <p className="text-sm text-zinc-600 py-6">Aucune demande pour le moment.</p>}
+          <div>
+            {devis.slice(0, 5).map((d) => (
+              <div key={d.id} className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto] items-center gap-x-4 gap-y-1 px-2 py-3.5 border-t border-[#f0ead9] transition-colors hover:bg-[#faf6ea]">
+                <div className="min-w-0">
+                  <p className="font-semibold text-sm text-zinc-900 truncate">{d.full_name}</p>
+                  <p className="text-xs text-zinc-600 truncate">{[d.event_type, d.city].filter(Boolean).join(" · ") || "—"}</p>
+                </div>
+                <span className="font-semibold text-sm text-zinc-900 sm:text-right">{formatPrice(d.estimated_total)}</span>
                 <StatusBadge status={d.status} />
               </div>
             ))}
           </div>
-        </div>
+        </section>
+
+        <section className={`${card} px-6 pt-6 pb-3 ${enter}`}>
+          <h2 className="font-display text-2xl font-semibold text-zinc-900">Prochains événements</h2>
+          {upcoming.length === 0 && <p className="text-sm text-zinc-600 py-6">Aucun événement à venir.</p>}
+          <div className="mt-3">
+            {upcoming.map((d) => {
+              const date = new Date(d.event_date + "T00:00:00");
+              return (
+                <div key={d.id} className="flex items-center gap-3.5 px-2 py-3 border-t border-[#f0ead9] transition-colors hover:bg-[#faf6ea]">
+                  <div className="h-[52px] w-12 shrink-0 rounded-[10px] bg-[#faf3d9] flex flex-col items-center justify-center leading-none">
+                    <span className="text-[10px] uppercase tracking-widest text-zinc-600">{MONTHS_LONG[date.getMonth()]}</span>
+                    <span className="font-display text-[22px] font-bold text-[#7a5f12] mt-0.5">{date.getDate()}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm text-zinc-900 truncate">{d.full_name}</p>
+                    <p className="text-xs text-zinc-600 truncate">{[d.event_type, d.city].filter(Boolean).join(" · ") || "—"}</p>
+                  </div>
+                  <StatusBadge status={d.status} />
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </div>
     </div>
   );
@@ -346,6 +527,8 @@ function PlanningView() {
     dayBookings.forEach(b => { const pid = b.product_id; productCount[pid] = (productCount[pid] || 0) + 1; if (productCount[pid] > 1) conflicts.add(pid); });
   });
   const today = new Date();
+  const weekBookings = bookings.filter((b) => days.some((day) => getBookingsForDay(day).some((x) => x.id === b.id)));
+  const weekProducts = new Set(weekBookings.map((b) => b.product_id)).size;
 
   return (
     <div className="space-y-6 bg-[#0A0A0A] -m-6 md:-m-10 p-6 md:p-10 min-h-screen text-zinc-300">
@@ -369,8 +552,8 @@ function PlanningView() {
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-white">{bookings.length}</p><p className="text-sm text-zinc-400">réservations cette semaine</p></div>
-        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-[#D4AF37]">62 %</p><p className="text-sm text-zinc-400">taux d'occupation du stock</p></div>
+        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-white">{weekBookings.length}</p><p className="text-sm text-zinc-400">réservation(s) cette semaine</p></div>
+        <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-[#D4AF37]">{weekProducts}</p><p className="text-sm text-zinc-400">produit(s) réservé(s) cette semaine</p></div>
         <div className="bg-[#141414] border border-zinc-800 p-5 rounded-sm"><p className="text-3xl font-display text-red-400">{conflicts.size}</p><p className="text-sm text-zinc-400">conflit(s) à résoudre</p></div>
       </div>
 
@@ -554,10 +737,10 @@ function NewBookingModal({ products, onClose, onSaved }: { products: any[]; onCl
 // ============================================================
 // DEVIS
 // ============================================================
-function DevisList() {
+function DevisList({ initialSearch = "" }: { initialSearch?: string }) {
   const [devis, setDevis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(initialSearch);
   const [selected, setSelected] = useState<any>(null);
   const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
 
@@ -699,9 +882,25 @@ function DevisList() {
 // ============================================================
 // COMPOSANTS EXISTANTS
 // ============================================================
+const STATUS_STYLES: Record<string, { label: string; bg: string; fg: string }> = {
+  nouveau: { label: "Nouveau", bg: "#e3ecfb", fg: "#1c3f86" },
+  en_cours: { label: "En cours", bg: "#fdeec2", fg: "#6e5400" },
+  devis_envoye: { label: "Devis envoyé", bg: "#e8defa", fg: "#4a2a8a" },
+  accepte: { label: "Accepté", bg: "#dcf1e2", fg: "#14532d" },
+  refuse: { label: "Refusé", bg: "#fbe1de", fg: "#8a1f14" },
+};
+
 function StatusBadge({ status }: { status: string }) {
-  const styles: Record<string, string> = { nouveau: "bg-blue-100 text-blue-800", en_cours: "bg-yellow-100 text-yellow-800", devis_envoye: "bg-purple-100 text-purple-800", accepte: "bg-green-100 text-green-800", refuse: "bg-red-100 text-red-800" };
-  return <span className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase tracking-wide ${styles[status] || "bg-gray-100"}`}>{status.replace("_", " ")}</span>;
+  const s = STATUS_STYLES[status] ?? { label: (status || "—").replace(/_/g, " "), bg: "#eeeeee", fg: "#3f3f46" };
+  return (
+    <span
+      style={{ background: s.bg, color: s.fg }}
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap"
+    >
+      <span style={{ background: s.fg }} className="h-1.5 w-1.5 rounded-full" />
+      {s.label}
+    </span>
+  );
 }
 
 function ProductList() {
