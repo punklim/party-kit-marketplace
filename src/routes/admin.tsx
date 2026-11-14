@@ -532,7 +532,6 @@ function PlanningView() {
   const weekBookings = bookings.filter((b) => days.some((day) => getBookingsForDay(day).some((x) => x.id === b.id)));
   const weekProducts = new Set(weekBookings.map((b) => b.product_id)).size;
 
-  // On ajoute la fonction pour gérer le clic sur le conflit
   const handleConflictClick = () => {
     alert("Pour résoudre ce conflit, allez dans 'Réservations' et modifiez les dates de l'une des deux réservations.");
   };
@@ -652,6 +651,7 @@ function PlanningView() {
     </div>
   );
 }
+
 // ============================================================
 // MODAL NOUVELLE RÉSERVATION
 // ============================================================
@@ -1499,6 +1499,7 @@ function ArticleForm({ post, onClose, onSave }: { post: any, onClose: () => void
 function BookingsList() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editingBooking, setEditingBooking] = useState<any>(null); // NOUVEAU : État pour le modal
 
   const fetch = async () => {
     setLoading(true);
@@ -1535,11 +1536,118 @@ function BookingsList() {
                 <td className="px-6 py-4"><p className="font-medium">{b.client_name}</p><p className="text-xs text-zinc-500">{b.client_email}</p><p className="text-xs text-zinc-500">{b.client_phone}</p></td>
                 <td className="px-6 py-4 text-zinc-600">Du {new Date(b.start_date).toLocaleDateString("fr-FR")}<br />Au {new Date(b.end_date).toLocaleDateString("fr-FR")}</td>
                 <td className="px-6 py-4"><select value={b.status} onChange={e => updateStatus(b.id, e.target.value)} className="text-xs border rounded p-1.5"><option value="en_attente">En attente</option><option value="confirme">Confirmé</option><option value="annule">Annulé</option></select></td>
-                <td className="px-6 py-4 text-right"><button onClick={() => del(b.id)} className="p-2 text-zinc-400 hover:text-red-600"><Trash2 className="h-4 w-4" /></button></td>
+                <td className="px-6 py-4 text-right">
+                  <div className="flex justify-end gap-2">
+                    {/* NOUVEAU BOUTON MODIFIER */}
+                    <button onClick={() => setEditingBooking(b)} className="p-2 text-zinc-400 hover:text-blue-600" aria-label="Modifier">
+                      <Edit className="h-4 w-4" />
+                    </button>
+                    <button onClick={() => del(b.id)} className="p-2 text-zinc-400 hover:text-red-600" aria-label="Supprimer">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* NOUVEAU : MODAL DE MODIFICATION */}
+      {editingBooking && (
+        <EditBookingModal 
+          booking={editingBooking} 
+          onClose={() => setEditingBooking(null)} 
+          onSave={() => { setEditingBooking(null); fetch(); }} 
+        />
+      )}
+    </div>
+  );
+}
+
+// NOUVEAU COMPOSANT : FENÊTRE DE MODIFICATION
+function EditBookingModal({ booking, onClose, onSave }: { booking: any, onClose: () => void, onSave: () => void }) {
+  const [form, setForm] = useState({
+    startDate: booking.start_date,
+    endDate: booking.end_date,
+    quantity: booking.quantity,
+    status: booking.status,
+  });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError("");
+    
+    if (form.endDate < form.startDate) {
+      setError("La date de fin doit être après la date de début.");
+      return;
+    }
+
+    setSaving(true);
+    const { error: err } = await (supabase as any)
+      .from("bookings")
+      .update({
+        start_date: form.startDate,
+        end_date: form.endDate,
+        quantity: Number(form.quantity),
+        status: form.status,
+      })
+      .eq("id", booking.id);
+
+    setSaving(false);
+    if (err) setError(err.message);
+    else onSave();
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-sm shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+        <div className="p-6 border-b flex justify-between items-center">
+          <div>
+            <h2 className="font-display text-xl">Modifier la réservation</h2>
+            <p className="text-xs text-zinc-500 mt-1">{booking.client_name} — {booking.products?.name}</p>
+          </div>
+          <button onClick={onClose}><X className="h-5 w-5" /></button>
+        </div>
+        
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {error && <div className="bg-red-50 text-red-700 p-3 text-sm border border-red-200">{error}</div>}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">Début</label>
+              <input required type="date" value={form.startDate} onChange={e => setForm({ ...form, startDate: e.target.value })} className={field} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">Fin</label>
+              <input required type="date" value={form.endDate} onChange={e => setForm({ ...form, endDate: e.target.value })} className={field} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">Quantité</label>
+              <input required type="number" min={1} value={form.quantity} onChange={e => setForm({ ...form, quantity: Number(e.target.value) })} className={field} />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 mb-1 block">Statut</label>
+              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} className={field}>
+                <option value="en_attente">En attente</option>
+                <option value="confirme">Confirmé</option>
+                <option value="annule">Annulé</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="pt-4 border-t flex justify-end gap-3">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-100 rounded">Annuler</button>
+            <button type="submit" disabled={saving} className="bg-[#D4AF37] text-black px-6 py-2 text-sm font-medium rounded disabled:opacity-50">
+              {saving ? "Enregistrement..." : "Enregistrer les modifications"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
