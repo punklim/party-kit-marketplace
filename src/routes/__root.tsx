@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 import { CookieBanner } from "../components/CookieBanner";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, Home } from "lucide-react";
+import { Home, RotateCw } from "lucide-react";
 import {
   Outlet,
   Link,
@@ -29,10 +29,10 @@ function NotFoundComponent() {
         <p className="text-primary uppercase tracking-[0.35em] text-sm mb-6">Éclat Events</p>
         <h1 className="text-7xl md:text-9xl font-display text-secondary mb-6">404</h1>
         <h2 className="text-3xl md:text-4xl font-display mb-4">
-          {t("error.notFoundTitle") || "Cette page n'existe pas"}
+          {t("error.notFoundTitle")}
         </h2>
         <p className="text-muted-foreground mb-10 text-lg">
-          {t("error.notFoundText") || "Il semblerait que vous vous soyez égaré. Pas d'inquiétude, revenons à l'essentiel."}
+          {t("error.notFoundText")}
         </p>
         
         <div className="flex flex-wrap gap-4 justify-center">
@@ -41,7 +41,7 @@ function NotFoundComponent() {
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
           >
             <Home className="h-4 w-4" />
-            {t("error.backHome") || "Retour à l'accueil"}
+            {t("error.backHome")}
           </Link>
         </div>
       </div>
@@ -62,10 +62,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
       <div className="max-w-2xl">
         <p className="text-primary uppercase tracking-[0.35em] text-sm mb-6">Éclat Events</p>
         <h2 className="text-3xl md:text-5xl font-display mb-4">
-          {t("error.errorTitle") || "Une erreur est survenue"}
+          {t("error.errorTitle")}
         </h2>
         <p className="text-muted-foreground mb-10 text-lg">
-          {t("error.errorText") || "Quelque chose s'est mal passé de notre côté. Veuillez réessayer ou revenir à l'accueil."}
+          {t("error.errorText")}
         </p>
         
         <div className="flex flex-wrap gap-4 justify-center">
@@ -76,21 +76,22 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
             }}
             className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-8 py-4 uppercase tracking-widest text-sm hover:opacity-90 transition-all duration-300"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {t("error.retry") || "Réessayer"}
+            <RotateCw className="h-4 w-4" />
+            {t("error.retry")}
           </button>
           <a
             href="/"
             className="inline-flex items-center gap-2 border border-secondary px-8 py-4 uppercase tracking-widest text-sm hover:bg-secondary hover:text-secondary-foreground transition-all duration-300"
           >
             <Home className="h-4 w-4" />
-            {t("error.backHome") || "Retour à l'accueil"}
+            {t("error.backHome")}
           </a>
         </div>
 
-        {error && error.message && (
+        {/* Détails techniques : affichés uniquement en développement */}
+        {import.meta.env.DEV && error && error.message && (
           <details className="mt-12 text-xs text-muted-foreground">
-            <summary className="cursor-pointer hover:text-foreground">Détails techniques</summary>
+            <summary className="cursor-pointer hover:text-foreground">{t("error.technicalDetails")}</summary>
             <pre className="mt-2 p-4 bg-black/5 rounded text-left overflow-auto max-w-full">
               {error.message}
             </pre>

@@ -252,6 +252,7 @@ const resources = {
       "error.errorText": "Quelque chose s'est mal passé de notre côté. Veuillez réessayer ou revenir à l'accueil.",
       "error.retry": "Réessayer",
       "error.backHome": "Retour à l'accueil",
+      "error.technicalDetails": "Détails techniques",
 
       // Blog
       "blog.title": "Notre Blog",
@@ -500,11 +501,12 @@ const resources = {
 
       // Errors
       "error.notFoundTitle": "This page doesn't exist",
-      "error.notFoundText": "It seems you got lost. Don't worry, let's get back on track.",
-      "error.errorTitle": "An error occurred",
+      "error.notFoundText": "It looks like you've wandered off. No worries, let's get back to the essentials.",
+      "error.errorTitle": "Something went wrong",
       "error.errorText": "Something went wrong on our end. Please try again or go back home.",
       "error.retry": "Try again",
       "error.backHome": "Back to home",
+      "error.technicalDetails": "Technical details",
 
       // Blog
       "blog.title": "Our Blog",
@@ -769,11 +771,12 @@ const resources = {
 
       // Errors
       "error.notFoundTitle": "هذه الصفحة غير موجودة",
-      "error.notFoundText": "يبدو أنك تهت. لا تقلق، دعنا نعد إلى الأساسيات.",
+      "error.notFoundText": "يبدو أنك ضللت الطريق. لا تقلق، لنعد إلى الأساسيات.",
       "error.errorTitle": "حدث خطأ",
       "error.errorText": "حدث خطأ من جانبنا. يرجى المحاولة مرة أخرى أو العودة إلى الرئيسية.",
-      "error.retry": "حاول مرة أخرى",
+      "error.retry": "إعادة المحاولة",
       "error.backHome": "العودة إلى الرئيسية",
+      "error.technicalDetails": "التفاصيل التقنية",
 
       // المدونة
       "blog.title": "مدونتنا",
